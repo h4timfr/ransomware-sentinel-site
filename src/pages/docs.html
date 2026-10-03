@@ -179,7 +179,7 @@
           <tbody>
             <tr><td>Rapid file modification</td><td>50 modifications</td><td>25</td></tr>
             <tr><td>Mass file rename</td><td>20 renames</td><td>25</td></tr>
-            <tr><td>Suspicious extension</td><td>1 or more renames to, for example, <code>.locked</code></td><td>20</td></tr>
+            <tr><td>Suspicious extension</td><td>1 or more renames to, for example, <code>.locked</code>; or 10 files changed to unfamiliar extensions, or copied to a new extension and the original deleted</td><td>20</td></tr>
             <tr><td>Mass file creation</td><td>50 new files</td><td>15</td></tr>
             <tr><td>High event concentration</td><td>75 events</td><td>15</td></tr>
           </tbody>
@@ -317,6 +317,9 @@
         <li>Only a CRITICAL incident changes the posture from PROTECTED; a HIGH incident is shown as an open incident instead.</li>
         <li>On small screens, the sidebar's Learn group can sit below the fold; scroll the sidebar (the guided tour does this for you).</li>
         <li>It cannot guarantee that every ransomware family is detected.</li>
+        <li>Detection looks at bursts of activity within 30 seconds. Files encrypted in place without being renamed, or encrypted slowly enough that no 30-second period looks unusual, stay below an alert.</li>
+        <li>Under a flood of file activity beyond what it can analyse, Sentinel drops some routine events and says so (the status shows it); the window can pause for a few seconds at the peak.</li>
+        <li>A program running as you can roll back Sentinel's own records if it also restores an old copy of the integrity marker kept in your registry.</li>
       </ul>
     </section>
 
