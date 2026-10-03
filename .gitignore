@@ -1,0 +1,13 @@
+dist/
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
+.env
+.env.*
+# Installers are published as GitHub release assets, never committed.
+*.exe
+*.msi

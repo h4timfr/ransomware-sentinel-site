@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Everything this site loads comes from this site: no fonts, scripts,
+       analytics or trackers from anywhere else. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>{{title}}</title>
+  <meta name="description" content="{{description}}">
+  <meta name="robots" content="{{robots}}">
+  {{#if canonical}}<link rel="canonical" href="{{canonical}}">{{/if}}
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0d1117">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{siteName}}">
+  <meta property="og:title" content="{{title}}">
+  <meta property="og:description" content="{{description}}">
+  {{#if canonical}}<meta property="og:url" content="{{canonical}}">{{/if}}
+  <meta property="og:image" content="{{ogImage}}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Ransomware Sentinel: local ransomware protection for Windows, next to its dashboard">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="{{root}}assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="{{root}}assets/img/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="{{root}}assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="{{root}}assets/css/site.css">
+  <script src="{{root}}assets/js/site.js" defer></script>
+</head>
+<body class="{{bodyClass}}">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="{{root}}" aria-label="Ransomware Sentinel home">
+        <img src="{{root}}assets/img/favicon.svg" alt="" width="32" height="32">
+        <span>Ransomware Sentinel</span>
+      </a>
+      <nav class="nav-inline" aria-label="Main">
+        <a href="{{root}}#how-it-works" aria-current="{{nav_how}}">How it works</a>
+        <a href="{{root}}#features" aria-current="{{nav_product}}">Features</a>
+        <a href="{{root}}docs/" aria-current="{{nav_docs}}">Documentation</a>
+        <a href="{{root}}faq/" aria-current="{{nav_faq}}">FAQ</a>
+        <a class="btn btn-primary btn-small" href="{{root}}download/" aria-current="{{nav_download}}">Download</a>
+      </nav>
+      <details class="nav-menu">
+        <summary><span class="menu-icon" aria-hidden="true"></span><span>Menu</span></summary>
+        <nav aria-label="Main (mobile)">
+          <a href="{{root}}#how-it-works">How it works</a>
+          <a href="{{root}}#features">Features</a>
+          <a href="{{root}}docs/">Documentation</a>
+          <a href="{{root}}faq/">FAQ</a>
+          <a class="btn btn-primary" href="{{root}}download/">Download for Windows</a>
+        </nav>
+      </details>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+{{{content}}}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="{{root}}">
+          <img src="{{root}}assets/img/favicon.svg" alt="" width="28" height="28">
+          <span>Ransomware Sentinel</span>
+        </a>
+        <p>Local ransomware detection for the folders you choose. Use it alongside Microsoft Defender and regular backups, not instead of them.</p>
+      </div>
+      <nav class="footer-links" aria-label="Footer">
+        <div>
+          <h2>Product</h2>
+          <a href="{{root}}download/">Download</a>
+          <a href="{{root}}#how-it-works">How it works</a>
+          <a href="{{root}}#limits">Limitations</a>
+          <a href="{{releaseNotesUrl}}" rel="noopener">Release notes</a>
+        </div>
+        <div>
+          <h2>Help</h2>
+          <a href="{{root}}docs/">Documentation</a>
+          <a href="{{root}}docs/#troubleshooting">Troubleshooting</a>
+          <a href="{{root}}faq/">FAQ</a>
+        </div>
+        <div>
+          <h2>About</h2>
+          <a href="{{root}}privacy/">Privacy</a>
+          <a href="{{root}}privacy/#license">License</a>
+          <a href="{{publicRepoUrl}}" rel="noopener">GitHub</a>
+        </div>
+      </nav>
+    </div>
+    <div class="wrap footer-meta">
+      <p>Version {{version}} · released {{releaseDate}} · This site uses no cookies, analytics or trackers.</p>
+    </div>
+  </footer>
+</body>
+</html>

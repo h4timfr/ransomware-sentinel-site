@@ -1,0 +1,131 @@
+<!--page
+{
+  "path": "download/",
+  "nav": "download",
+  "title": "Download Ransomware Sentinel {{version}} for Windows",
+  "description": "Download the Ransomware Sentinel {{version}} installer for Windows 10 and 11 (64-bit). Free, no account. Includes the SHA-256 checksum and step-by-step installation help."
+}
+-->
+<section class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Download</span>
+    <h1>Ransomware Sentinel for Windows</h1>
+    <p class="lead">One installer. No Python, no command line, no account. After installing, a short setup helps you choose the folders to protect.</p>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="get">
+  <div class="wrap">
+    <h2 id="get" class="visually-hidden">Get the installer</h2>
+    <div class="download-panel">
+      <div>
+        <h3>Version {{version}}</h3>
+        <p class="muted">Released {{releaseDate}}</p>
+        {{#if sha256}}
+        <a class="btn btn-primary btn-large" href="{{downloadUrl}}">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 5.2 10.4 4v7.2H3zm8.4-1.3L21 2.5v8.7h-9.6zM3 12.6h7.4v7.3L3 18.8zm8.4 0H21v8.9l-9.6-1.4z"/></svg>
+          Download for Windows
+        </a>
+        <p class="small muted spaced-top">{{installerFile}} · {{size}} · {{architecture}}</p>
+        {{else}}
+        <div class="callout callout-warn"><p><strong>The installer for version {{version}} is not published yet.</strong> This page will offer it as soon as it is.</p></div>
+        {{/if}}
+      </div>
+      <table class="spec-table">
+        <caption class="visually-hidden">Installer details</caption>
+        <tbody>
+          <tr><th scope="row">Version</th><td>{{version}} ({{releaseDate}})</td></tr>
+          <tr><th scope="row">Works on</th><td>{{windows}}. Tested on {{testedOn}}.</td></tr>
+          <tr><th scope="row">File</th><td>{{installerFile}}{{#if size}} ({{size}}){{/if}}</td></tr>
+          <tr><th scope="row">Installer</th><td>Standard Windows installer with Start menu entry and uninstaller</td></tr>
+          <tr><th scope="row">Code signing</th><td>{{#if signed}}Signed{{else}}Not code-signed yet (<a href="#smartscreen">what this means</a>){{/if}}</td></tr>
+          <tr><th scope="row">Release notes</th><td><a href="{{releaseNotesUrl}}" rel="noopener">What's new in {{version}}</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    {{#if sha256}}
+    <div class="spaced-top">
+      <h3 id="checksum">SHA-256 checksum</h3>
+      <p class="muted small">Optional, for people who want to confirm the file is exactly the one published here (<a href="#verify">how</a>).</p>
+      <div class="checksum">
+        <code id="sha256">{{sha256}}</code>
+        <button class="btn btn-secondary btn-small copy-btn" type="button" data-copy="sha256" data-status="copy-status" hidden>Copy</button>
+      </div>
+      <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
+    </div>
+    {{/if}}
+  </div>
+</section>
+
+<section class="section section-alt" aria-labelledby="install">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Installing</span>
+      <h2 id="install">Install in five steps</h2>
+    </div>
+    <ol class="install-steps">
+      <li>
+        <h3>Download the installer</h3>
+        <p>Press <strong>Download for Windows</strong> above. Your browser saves <code>{{installerFile}}</code>, usually in your Downloads folder.</p>
+      </li>
+      <li>
+        <h3>Open it</h3>
+        <p>Open the file from your browser's downloads list or from the Downloads folder. Windows may show a warning first; see <a href="#smartscreen">why, and what to do</a>.</p>
+      </li>
+      <li>
+        <h3>Choose who it is for</h3>
+        <p>Setup asks whether to install for <strong>all users</strong> (recommended; Windows asks for permission to make changes) or <strong>just for you</strong> (no administrator rights needed). Then read the short "Before you install" page.</p>
+      </li>
+      <li>
+        <h3>Finish setup</h3>
+        <p>Keep the suggested folder, choose whether you want a desktop shortcut, and press <strong>Install</strong>. Leave <strong>Open Ransomware Sentinel now</strong> ticked and press <strong>Finish</strong>.</p>
+      </li>
+      <li>
+        <h3>Choose your folders</h3>
+        <p>Sentinel opens with a four-step setup: it explains what it does, proposes your folders, runs a quick scan and starts protection. The <a href="{{root}}docs/#first-run">documentation</a> walks through every screen.</p>
+      </li>
+    </ol>
+    <div class="callout">
+      <p><strong>Sentinel protects while it is open.</strong> It does not start with Windows by itself. Open it from the Start menu (or the desktop shortcut) when you start your computer; you can let it start protection automatically every time it opens.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="smartscreen">
+  <div class="wrap docs-content">
+    <h2 id="smartscreen">If Windows shows a warning</h2>
+    <p>The installer is <strong>not code-signed</strong> yet: it does not carry a certificate identifying its publisher, and as a new download Windows has not seen it often. Because of that you may see one or more of these:</p>
+    <ul>
+      <li>Your browser may say the file "isn't commonly downloaded".</li>
+      <li><strong>Microsoft Defender SmartScreen</strong> may say "Windows protected your PC" and, under <em>More info</em>, list the publisher as <em>Unknown publisher</em>.</li>
+      <li>When installing for all users, Windows asks whether to allow an app from an <em>unknown publisher</em> to make changes.</li>
+    </ul>
+    <p>These warnings are Windows being careful with software it can't yet vouch for, and they are worth taking seriously. Before you continue, make sure that:</p>
+    <ul class="check-list">
+      <li>you downloaded the file from this page yourself, and</li>
+      <li>the file is named <code>{{installerFile}}</code>{{#if sha256}} and, if you want to be certain, its <a href="#verify">SHA-256 checksum</a> matches the one above{{/if}}.</li>
+    </ul>
+    <p>If both are true and you want to install, SmartScreen's <em>More info</em> link shows a <em>Run anyway</em> button. If you are unsure, don't run it, and ask someone you trust to check it with you.</p>
+    <div class="callout callout-warn">
+      <p>Never turn off Microsoft Defender, SmartScreen or your antivirus to install Ransomware Sentinel (or anything else). Nothing on this site asks you to.</p>
+    </div>
+
+    <h2 id="verify">Check the file (optional)</h2>
+    <p>A SHA-256 checksum is a fingerprint of the file. If even one byte differs, the fingerprint is completely different. To compare it, open <strong>Windows PowerShell</strong> from the Start menu and run:</p>
+    <pre><code>Get-FileHash "$env:USERPROFILE\Downloads\{{installerFile}}" -Algorithm SHA256</code></pre>
+    <p>The <em>Hash</em> it prints should match the checksum {{#if sha256}}shown <a href="#checksum">above</a>{{else}}published with the release{{/if}} (capital and small letters don't matter). The checksum is also published as <a href="{{checksumUrl}}" rel="noopener">{{installerFile}}.sha256</a> with the release.</p>
+    <p class="small muted">Other options: <code>certutil -hashfile {{installerFile}} SHA256</code> in Command Prompt, or <code>sha256sum</code> on Linux and macOS.</p>
+
+    <h2 id="uninstall">Uninstalling</h2>
+    <ol>
+      <li>Close Ransomware Sentinel.</li>
+      <li>Open <strong>Settings → Apps → Installed apps</strong> (on Windows 10: <strong>Settings → Apps → Apps &amp; features</strong>).</li>
+      <li>Find <strong>Ransomware Sentinel</strong>, choose <strong>Uninstall</strong> and confirm.</li>
+    </ol>
+    <p>Uninstalling removes the program. Your Sentinel records (incident history, audit log, settings and any quarantined files) are deliberately kept in <code>%LOCALAPPDATA%\RansomwareSentinel</code>; delete that folder yourself if you no longer need them. Reinstalling later picks them up again.</p>
+
+    <h2 id="updating">Updating</h2>
+    <p>Sentinel does not update itself or check for updates (it never connects to the internet). To update, download the newer installer from this page and run it: it replaces the program and keeps your settings and records.</p>
+  </div>
+</section>

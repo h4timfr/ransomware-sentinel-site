@@ -1,0 +1,263 @@
+<!--page
+{
+  "path": "",
+  "nav": "home",
+  "title": "Ransomware Sentinel: local ransomware protection for Windows",
+  "description": "Ransomware Sentinel watches your Desktop, Documents, Pictures and other personal folders for the behaviour ransomware leaves behind, explains what it found and helps you respond. Free, no account, runs entirely on your PC."
+}
+-->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">For Windows 10 and 11 · Free · No account</span>
+      <h1>Local ransomware protection for Windows.</h1>
+      <p class="lead">Ransomware Sentinel watches your Desktop, Documents, Pictures and other personal folders for the behaviour ransomware leaves behind, and tells you plainly what happened, why it matters and what to do next.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-large" href="{{root}}download/">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 5.2 10.4 4v7.2H3zm8.4-1.3L21 2.5v8.7h-9.6zM3 12.6h7.4v7.3L3 18.8zm8.4 0H21v8.9l-9.6-1.4z"/></svg>
+          Download for Windows
+        </a>
+        <a class="btn btn-secondary btn-large" href="#how-it-works">See how it works</a>
+      </div>
+      <p class="hero-meta">Version {{version}} · {{#if size}}{{size}} · {{/if}}64-bit installer · Everything runs on your computer</p>
+    </div>
+    <div class="hero-shot">
+      <figure class="screenshot">
+        <x-shot name="08-dashboard-protection-active" alt="The Ransomware Sentinel dashboard showing PROTECTION ACTIVE: 7 protected locations watched, an initial scan of 551 files complete, and the security posture PROTECTED." sizes="(min-width: 1200px) 680px, (min-width: 1000px) 58vw, 100vw" loading="eager"></x-shot>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="section-tight" aria-label="At a glance">
+  <div class="wrap">
+    <div class="facts">
+      <div class="fact"><strong>Runs on your PC</strong><span>No account, no cloud service. Sentinel sends nothing over the internet.</span></div>
+      <div class="fact"><strong>Protects your folders</strong><span>Desktop, Documents, Downloads, Pictures, Videos and Music, found automatically.</span></div>
+      <div class="fact"><strong>Explains itself</strong><span>Every point of the 0 to 100 risk score is tied to a rule you can read.</span></div>
+      <div class="fact"><strong>Honest about limits</strong><span>It says plainly what it does not do. So do we, <a href="#limits">below</a>.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how-it-works">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">How it works</span>
+      <h2>Choose your folders. Sentinel does the watching.</h2>
+      <p>The first time you open Sentinel, a short setup walks you through it. After that, the dashboard always shows what is being watched and the one thing worth doing next.</p>
+    </div>
+    <ol class="steps">
+      <li><span class="stage">Protect</span><h3>Choose</h3><p>Sentinel proposes your personal folders. Untick any you don't want watched, or add your own.</p></li>
+      <li><span class="stage">Protect</span><h3>Scan</h3><p>It lists the files already there and flags encrypted-looking names. It never opens or changes a file.</p></li>
+      <li><span class="stage">Protect</span><h3>Monitor</h3><p>Continuous monitoring then watches those folders for changes, renames and new files.</p></li>
+      <li><span class="stage">Investigate</span><h3>Detect</h3><p>Five behaviour rules score the activity from 0 to 100. A high score raises an alert and opens an incident.</p></li>
+      <li><span class="stage">Respond</span><h3>Respond</h3><p>See what changed and why it was flagged, then acknowledge, investigate, contain or resolve it.</p></li>
+      <li><span class="stage">Verify</span><h3>Verify</h3><p>Diagnostics show that Sentinel itself is working and that its audit record is intact.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section section-alt" id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Features</span>
+      <h2>What Ransomware Sentinel does</h2>
+    </div>
+
+    <div class="feature">
+      <div class="feature-copy">
+        <h3>Automatic protection, set up in a minute</h3>
+        <p>Sentinel finds your Desktop, Documents, Downloads, Pictures, Videos and Music through Windows itself, so a Documents folder that has been moved to OneDrive or another drive is found where it really is.</p>
+        <ul>
+          <li>OneDrive is detected and offered, but <strong>off by default</strong>: its sync client creates and renames files in bursts that can look like an attack.</li>
+          <li>Starting protection runs a quick initial scan first, then continuous monitoring. Listing your files is never mistaken for ransomware.</li>
+          <li>Optionally, protection starts by itself each time you open Sentinel.</li>
+        </ul>
+      </div>
+      <figure class="screenshot">
+        <x-shot name="02-setup-locations" alt="Setup step 2: Desktop, Documents, Downloads, Pictures, Videos and Music are ticked; OneDrive is listed but unticked." sizes="(min-width: 960px) 620px, 100vw"></x-shot>
+      </figure>
+    </div>
+
+    <div class="feature reverse">
+      <div class="feature-copy">
+        <h3>Behaviour-based detection with a score you can read</h3>
+        <p>Sentinel doesn't rely on recognising known ransomware files. It looks at what is happening to your files over a 30-second window:</p>
+        <ul class="rule-list">
+          <li>Rapid file modification <span class="pts">50 changes · 25 pts</span></li>
+          <li>Mass file renaming <span class="pts">20 renames · 25 pts</span></li>
+          <li>Renames to encrypted-looking extensions <span class="pts">any · 20 pts</span></li>
+          <li>Mass file creation <span class="pts">50 new files · 15 pts</span></li>
+          <li>High overall event concentration <span class="pts">75 events · 15 pts</span></li>
+        </ul>
+        <div class="bands" aria-label="Risk levels">
+          <div class="band band-low"><b>LOW</b><span>1–29</span></div>
+          <div class="band band-medium"><b>MEDIUM</b><span>30–59</span></div>
+          <div class="band band-high"><b>HIGH</b><span>60–79</span></div>
+          <div class="band band-critical"><b>CRITICAL</b><span>80–100</span></div>
+        </div>
+        <p class="small">A HIGH score raises an alert. Related alerts are grouped into one incident per episode. Thresholds are adjustable in Settings.</p>
+      </div>
+      <figure class="screenshot">
+        <x-shot name="14-alerts" alt="The Alerts page listing a HIGH alert with risk score 60 and the rules that fired." sizes="(min-width: 960px) 620px, 100vw"></x-shot>
+        <figcaption><span class="tag tag-demo">Safe Demo</span>Alert raised by the built-in Safe Demo: synthetic files, real detection.</figcaption>
+      </figure>
+    </div>
+
+    <div class="feature">
+      <div class="feature-copy">
+        <h3>Investigate and respond, with a record of every step</h3>
+        <p>An incident shows the rules and points behind its score, what happened to each file (following renames as one file), and a timeline of every action taken.</p>
+        <ul>
+          <li>Acknowledge, mark as investigating, resolve or dismiss. Each action is confirmed and recorded.</li>
+          <li>When an incident names a program file, Sentinel can quarantine it. Often it can't name one (see <a href="#limits">limits</a>), and it says so rather than guessing.</li>
+          <li>Security records go into a tamper-evident (HMAC-SHA256 chained) audit log, checked at start-up and on demand.</li>
+        </ul>
+      </div>
+      <figure class="screenshot">
+        <x-shot name="16-incident-detail" alt="Incident #1, HIGH ransomware-like activity, marked SAFE DEMONSTRATION: risk 60/100, 30 files affected, process attribution UNKNOWN, with actions Acknowledge, Mark Investigating, Mark Resolved and Dismiss." sizes="(min-width: 960px) 620px, 100vw"></x-shot>
+        <figcaption><span class="tag tag-demo">Safe Demo</span>A demonstration incident. Attribution is UNKNOWN, as it usually is in real use.</figcaption>
+      </figure>
+    </div>
+
+    <div class="feature reverse">
+      <div class="feature-copy">
+        <h3>A Safe Demo you can run any time</h3>
+        <p>Curious what an alert looks like, or want to show someone? The Demo Center creates, edits and renames harmless text files in its own isolated folder and lets the real product detect them.</p>
+        <ul>
+          <li>It encrypts nothing, touches none of your files, ends no process and changes no system setting.</li>
+          <li>Each step turns green only when the product has actually done it.</li>
+          <li>Reset removes the demo files; the records are kept.</li>
+        </ul>
+      </div>
+      <figure class="screenshot">
+        <x-shot name="17-demo-complete" alt="The Demo Center after a complete demonstration, with every step checked: workspace prepared, synthetic activity, detection, incident, evidence, response, audit chain verified and recovery assessed." sizes="(min-width: 960px) 620px, 100vw"></x-shot>
+      </figure>
+    </div>
+
+    <div class="cards spaced-top">
+      <div class="card">
+        <h3><span class="icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Checks itself</h3>
+        <p>Diagnostics show whether monitoring, the database and the audit chain are healthy, so "protected" is something you can verify.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></span>Recovery readiness</h3>
+        <p>Sentinel can't recover encrypted files. A backup can. Point Sentinel at your backup folder and it checks that a recent copy appears to exist.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></span>Guided all the way</h3>
+        <p>A setup wizard, a guided tour of the real controls, a "next step" on the dashboard and short explanations wherever a term needs one.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="limits">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">What it is, and what it isn't</span>
+      <h2>A focused tool, stated plainly</h2>
+      <p>Ransomware Sentinel is one extra layer that watches your personal folders and explains what it sees. It is not a complete security suite, and it does not pretend to be.</p>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>It does</h3>
+        <ul class="check-list">
+          <li>Watch the folders you choose, while Sentinel is open</li>
+          <li>Recognise ransomware-like behaviour and explain the score</li>
+          <li>Group related alerts into one incident and record every response</li>
+          <li>Keep everything on your computer, with no account and no internet connection needed</li>
+          <li>Check whether a recent backup appears to exist</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>It does not</h3>
+        <ul class="cross-list">
+          <li>Replace Microsoft Defender or antivirus. Keep them on.</li>
+          <li>Stop programs or block file changes. It detects and records; you act.</li>
+          <li>Decrypt or recover files. Keep backups.</li>
+          <li>Watch folders you haven't chosen, or run before you open it. It doesn't start with Windows by itself.</li>
+          <li>Usually know which program made a change. File events don't say, and Sentinel doesn't guess.</li>
+          <li>Guarantee that every ransomware attack is detected.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="muted small spaced-top">The full list of limitations is in the <a href="{{root}}docs/#limitations">documentation</a> and the <a href="{{root}}assets/docs/Ransomware-Sentinel-Technical-Report.pdf">technical report</a>.</p>
+  </div>
+</section>
+
+<section class="section section-alt" id="screens">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The application</span>
+      <h2>See it before you install it</h2>
+      <p>Real screenshots of Ransomware Sentinel {{version}}. Alerts and incidents shown here come from the built-in Safe Demo, not from a real attack.</p>
+    </div>
+    <div class="gallery">
+      <figure>
+        <div class="screenshot"><x-shot name="01-setup-welcome" alt="Setup step 1, Welcome: what Sentinel does and does not do, with Start Setup and Not Now buttons." sizes="(min-width: 1200px) 560px, (min-width: 720px) 50vw, 100vw"></x-shot></div>
+        <figcaption>Setup starts by saying what Sentinel does, and what it doesn't.</figcaption>
+      </figure>
+      <figure>
+        <div class="screenshot"><x-shot name="05-setup-protection-active" alt="Setup step 4: protection is active, with buttons to take the guided tour, explore the dashboard or run the Safe Demo." sizes="(min-width: 1200px) 560px, (min-width: 720px) 50vw, 100vw"></x-shot></div>
+        <figcaption>Protection active, with three ways to continue.</figcaption>
+      </figure>
+      <figure>
+        <div class="screenshot"><x-shot name="09-protected-locations" alt="The Protected Locations page listing each folder and whether it is Watched." sizes="(min-width: 1200px) 560px, (min-width: 720px) 50vw, 100vw"></x-shot></div>
+        <figcaption>Protected Locations: every folder, and whether it can really be watched.</figcaption>
+      </figure>
+      <figure>
+        <div class="screenshot"><x-shot name="06-tour-next-step" alt="The guided tour highlighting the dashboard's Next step banner with an explanation and Back, Next and Skip Tour buttons." sizes="(min-width: 1200px) 560px, (min-width: 720px) 50vw, 100vw"></x-shot></div>
+        <figcaption>The guided tour points at the real controls.</figcaption>
+      </figure>
+      <figure>
+        <div class="screenshot"><x-shot name="12-dashboard-incident" alt="The dashboard while a demo incident is open: risk 60 of 100, HIGH, with a next-step banner to open the incident." sizes="(min-width: 1200px) 560px, (min-width: 720px) 50vw, 100vw"></x-shot></div>
+        <figcaption><span class="tag tag-demo">Safe Demo</span>The dashboard when an incident needs attention.</figcaption>
+      </figure>
+      <figure>
+        <div class="screenshot"><x-shot name="18-diagnostics" alt="The Diagnostics page showing monitoring state, events processed, database state and audit chain integrity VALID." sizes="(min-width: 1200px) 560px, (min-width: 720px) 50vw, 100vw"></x-shot></div>
+        <figcaption>Diagnostics: is Sentinel itself working, and is its record intact?</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq-preview">
+  <div class="wrap"><div class="faq">
+    <div class="section-head">
+      <span class="eyebrow">Questions</span>
+      <h2>Common questions</h2>
+    </div>
+    <details>
+      <summary>Is Ransomware Sentinel free?</summary>
+      <div><p>Yes. There is no price, no subscription and no account.</p></div>
+    </details>
+    <details>
+      <summary>Does it upload my files?</summary>
+      <div><p>No. Sentinel has no internet features at all: it does not upload files, scan results or usage data. Everything it records stays in your user profile on your computer.</p></div>
+    </details>
+    <details>
+      <summary>Does it replace Windows Defender?</summary>
+      <div><p>No. Sentinel is not antivirus. Keep Microsoft Defender (or your antivirus) turned on and keep backups; Sentinel adds a layer that watches your personal folders for ransomware-like behaviour.</p></div>
+    </details>
+    <details>
+      <summary>Why might Windows show a warning when I run the installer?</summary>
+      <div><p>The installer is not code-signed yet, and it is a new download that Windows has not seen often. Windows SmartScreen may therefore say it "protected your PC". The <a href="{{root}}download/#smartscreen">download page</a> explains what the warning means and how to check the file is the genuine one.</p></div>
+    </details>
+    <p><a href="{{root}}faq/">All questions →</a></p>
+  </div>
+  </div>
+</section>
+
+<section class="section section-alt cta-band">
+  <div class="wrap">
+    <h2>Get Ransomware Sentinel {{version}}</h2>
+    <p>One installer, no Python or technical setup. After installing, a short setup helps you choose the folders to protect.</p>
+    <div class="actions">
+      <a class="btn btn-primary btn-large" href="{{root}}download/">Download for Windows</a>
+      <a class="btn btn-secondary btn-large" href="{{root}}docs/#getting-started">Read Getting Started</a>
+    </div>
+    <p class="small muted spaced-top">{{windows}}</p>
+  </div>
+</section>

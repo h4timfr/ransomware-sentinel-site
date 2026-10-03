@@ -1,0 +1,336 @@
+<!--page
+{
+  "path": "docs/",
+  "nav": "docs",
+  "title": "Documentation: Ransomware Sentinel",
+  "description": "How to install and use Ransomware Sentinel: first-run setup, protected locations, starting protection, alerts and incidents, quarantine, diagnostics, the Safe Demo, troubleshooting and limitations."
+}
+-->
+<section class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Documentation · version {{version}}</span>
+    <h1>Using Ransomware Sentinel</h1>
+    <p class="lead">Everything you need, from installing to understanding an incident. New to Sentinel? Read <a href="#getting-started">Getting started</a> and stop there; the rest is for when you need it.</p>
+  </div>
+</section>
+
+<div class="wrap docs-layout">
+  <aside class="docs-toc">
+    <details open>
+      <summary>On this page</summary>
+      <nav aria-label="Documentation sections">
+        <h2>On this page</h2>
+        <ol>
+          <li><a href="#getting-started">Getting started</a></li>
+          <li><a href="#installing">Installing</a></li>
+          <li><a href="#first-run">First-run setup</a></li>
+          <li><a href="#locations">Protected locations</a></li>
+          <li><a href="#protection">Starting and stopping protection</a></li>
+          <li><a href="#initial-scan">The initial scan</a></li>
+          <li><a href="#dashboard">The dashboard</a></li>
+          <li><a href="#alerts-incidents">Alerts and incidents</a></li>
+          <li><a href="#investigating">Investigating an incident</a></li>
+          <li><a href="#quarantine">Quarantine</a></li>
+          <li><a href="#recovery">Recovery readiness</a></li>
+          <li><a href="#diagnostics">Diagnostics and audit</a></li>
+          <li><a href="#safe-demo">Safe Demo</a></li>
+          <li><a href="#settings">Settings</a></li>
+          <li><a href="#uninstalling">Uninstalling</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+          <li><a href="#limitations">Limitations</a></li>
+          <li><a href="#more">More documents</a></li>
+        </ol>
+      </nav>
+    </details>
+  </aside>
+
+  <div class="docs-content">
+    <section id="getting-started">
+      <h2>Getting started</h2>
+      <p>Ransomware Sentinel watches the folders where your own files live and recognises the behaviour typical of ransomware: bursts of file changes, mass renaming, and renames to encrypted-looking extensions such as <code>.locked</code>. It gives that activity a risk score from 0 to 100, explains every point of the score, groups related alerts into one incident, and helps you investigate and respond.</p>
+      <ol>
+        <li><a href="{{root}}download/">Download and install</a> Sentinel.</li>
+        <li>It opens with a short setup. Keep the suggested folders ticked, press <strong>Start Protection</strong>, and wait for <strong>PROTECTION ACTIVE</strong>.</li>
+        <li>Leave Sentinel open while you use your computer. The <strong>Next step</strong> box on the dashboard always tells you the one thing worth doing next.</li>
+        <li>If Sentinel raises an alert, open the incident it points to and read <em>Why this is suspicious</em>. The <a href="#alerts-incidents">alerts and incidents</a> section explains what to do.</li>
+      </ol>
+      <div class="callout">
+        <p><strong>Keep your other protection.</strong> Sentinel is not antivirus and does not replace Microsoft Defender. Keep Defender (or your antivirus) on and keep backups of the files that matter.</p>
+      </div>
+      <h3>The workflow</h3>
+      <p>Every page belongs to one of four stages, shown in a hint under its title together with a link to the natural next page:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Stage</th><th>Pages</th><th>What you do</th></tr></thead>
+          <tbody>
+            <tr><td>Protect</td><td>Dashboard, Protection, Protected Locations</td><td>Choose folders, start protection, keep it running.</td></tr>
+            <tr><td>Investigate</td><td>Activity, Alerts, Incidents</td><td>See what changed, why it was flagged, and which case it belongs to.</td></tr>
+            <tr><td>Respond</td><td>Incident detail, Quarantine, Recovery, Trust</td><td>Acknowledge, investigate, contain, resolve; check your backups.</td></tr>
+            <tr><td>Verify</td><td>Diagnostics, Logs</td><td>Check component health and the audit chain.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="installing">
+      <h2>Installing</h2>
+      <p>Download <code>{{installerFile}}</code> from the <a href="{{root}}download/">download page</a> and open it. Setup asks whether to install for all users (recommended; Windows asks for permission) or only for you (no administrator rights needed), shows a short "Before you install" summary, and offers a desktop shortcut. When it finishes it can open Sentinel straight away.</p>
+      <p>Requirements: {{windows}}. Python, Git and the command line are not needed.</p>
+      <p>The installer is not code-signed yet, so Windows may show a SmartScreen warning. The download page explains <a href="{{root}}download/#smartscreen">what it means and how to check the file</a>.</p>
+      <p>Sentinel keeps its records in <code>%LOCALAPPDATA%\RansomwareSentinel</code> (your user profile), never in the program folder.</p>
+    </section>
+
+    <section id="first-run">
+      <h2>First-run setup</h2>
+      <p>The first time Sentinel opens, a four-step setup appears over the main window.</p>
+      <h3>Step 1: Welcome</h3>
+      <p>Four lines on what Sentinel does and, just as plainly, what it does not do. Press <strong>Start Setup</strong>. (<strong>Not Now</strong> closes setup; reopen it later from <strong>Help → Run Setup Again</strong>.)</p>
+      <h3>Step 2: Protected locations</h3>
+      <figure class="screenshot">
+        <x-shot name="02-setup-locations" alt="Setup step 2 with Desktop, Documents, Downloads, Pictures, Videos and Music ticked and OneDrive unticked." sizes="(min-width: 1000px) 760px, 100vw"></x-shot>
+      </figure>
+      <p>Sentinel lists the folders where your own files normally live, ticked: Desktop, Documents, Downloads, Pictures, Videos and Music. It finds them through Windows itself, so a Documents folder moved to OneDrive or another drive is found where it really is. If OneDrive is set up it is listed unticked, because its sync client creates and renames files in bursts that can raise alerts. Untick anything you don't want watched and press <strong>Continue</strong>.</p>
+      <h3>Step 3: Initial scan</h3>
+      <p>Leave <em>Start protection automatically when Sentinel opens</em> ticked if you want protection to start by itself each time you open Sentinel. Press <strong>Start Protection</strong>. The <a href="#initial-scan">initial scan</a> runs; <strong>Skip Scan</strong> stops it early (monitoring still starts). When the panel says <strong>PROTECTION ACTIVE</strong>, press <strong>Continue</strong>.</p>
+      <h3>Step 4: Protection active</h3>
+      <p>The last screen shows what is running and offers <strong>Take Guided Tour</strong>, <strong>Explore Dashboard</strong> or <strong>Run Safe Demo</strong>. The first time, the guided tour starts by itself unless you choose the demo.</p>
+      <h3>The guided tour</h3>
+      <p>The tour dims the window, outlines one real control at a time and explains what it is for. Use <strong>Next</strong>, <strong>Back</strong> and <strong>Skip Tour</strong>, the arrow keys, or <kbd>Esc</kbd>. Replay it any time from <strong>Help → Guided Tour</strong> or the <strong>Getting Started</strong> page (in the sidebar's Learn group). <strong>Help → Quick Reference</strong> (<kbd>F1</kbd>) opens a one-page summary.</p>
+    </section>
+
+    <section id="locations">
+      <h2>Protected locations</h2>
+      <p>The <strong>Protected Locations</strong> page lists every protected folder and whether it can actually be watched.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>State</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>Watched</td><td>Activity in this folder is observed while protection runs.</td></tr>
+            <tr><td>Covered</td><td>The folder is inside another protected folder, which is watched instead (it is not watched twice).</td></tr>
+            <tr><td>Missing</td><td>The folder does not exist right now (for example a disconnected drive). It stays listed and is watched again when it returns.</td></tr>
+            <tr><td>No access</td><td>Sentinel does not have permission to read it.</td></tr>
+            <tr><td>Junction – not followed</td><td>The folder is a link that could point elsewhere; it is not followed.</td></tr>
+            <tr><td>Off</td><td>You unticked it. It stays in the list.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li>Tick or untick a folder to protect it or stop watching it.</li>
+        <li><strong>Add Location…</strong> adds any other folder. Adding a whole drive or a Windows or Program Files folder shows a warning first, because it produces far more activity and permission errors.</li>
+        <li><strong>Remove…</strong> takes a folder off the list. <strong>Re-check</strong> asks every folder for a fresh answer.</li>
+      </ul>
+    </section>
+
+    <section id="protection">
+      <h2>Starting and stopping protection</h2>
+      <p>Start and stop protection with the toolbar (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd> and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>) or the protection panel on the dashboard. Protection moves through clear states:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>State</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>PROTECTION OFF</td><td>Nothing is being watched. Press Start Protection.</td></tr>
+            <tr><td>STARTING PROTECTION</td><td>Protected locations are being checked (at most about 15 seconds for slow network folders).</td></tr>
+            <tr><td>INITIAL SCAN</td><td>Existing files are being listed. Monitoring is not running yet.</td></tr>
+            <tr><td>PROTECTION ACTIVE</td><td>Continuous monitoring of your protected locations is running.</td></tr>
+            <tr><td>STOPPING</td><td>Protection is being stopped.</td></tr>
+            <tr><td>PROTECTION NOT STARTED</td><td>Something failed; the message says what (for example, no folder can be watched).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Protection runs only while Sentinel is open. Closing the window stops it. Sentinel does not start with Windows by itself: open it when you start your computer, and tick <em>Start protection automatically when Sentinel opens</em> so it begins watching straight away.</p>
+      <p>"Protection active" means monitoring of your protected locations is running. It is not kernel-level monitoring and not a guarantee.</p>
+    </section>
+
+    <section id="initial-scan">
+      <h2>The initial scan</h2>
+      <p>Whenever protection starts, Sentinel first lists the files already in your protected locations and checks their names for encrypted-looking extensions. It does not open, read or change any file. The scan runs <em>before</em> continuous monitoring starts, so listing files is never mistaken for ransomware activity; during the scan, monitoring is not yet running.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Shown</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>Files examined</td><td>How many files were listed.</td></tr>
+            <tr><td>Suspicious names</td><td>Files whose extension is on the suspicious list (for example <code>.locked</code>). A name is not proof of encryption.</td></tr>
+            <tr><td>Skipped / inaccessible</td><td>Folders that could not be read and were passed over.</td></tr>
+            <tr><td>Initial scan</td><td>NOT RUN, RUNNING, COMPLETE, CANCELLED or FAILED.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="dashboard">
+      <h2>The dashboard</h2>
+      <figure class="screenshot">
+        <x-shot name="08-dashboard-protection-active" alt="The dashboard with PROTECTION ACTIVE, a Next step box suggesting a backup location, and the posture PROTECTED." sizes="(min-width: 1000px) 760px, 100vw"></x-shot>
+      </figure>
+      <ul>
+        <li><strong>Next step:</strong> one recommended action, decided from the current state: set up protection, start it, open an incident, fix a location, add a backup location, or try the demo.</li>
+        <li><strong>Protection panel:</strong> the protection state, your locations (watched, covered, missing…), the initial scan results, and whether the filesystem and process monitors are active.</li>
+        <li><strong>Security Posture:</strong> Sentinel's verdict on its own monitoring: PROTECTED, MONITORING, DEGRADED, ERROR, CRITICAL THREAT or MONITORING OFF. PROTECTED means the monitoring is working on your protected locations, not that the computer is safe. Only a critical incident changes it to CRITICAL THREAT; while a lower-severity incident is open it stays PROTECTED and says the incident is still open.</li>
+        <li><strong>Active Threat State:</strong> the current risk score and the number of active and critical incidents.</li>
+      </ul>
+    </section>
+
+    <section id="alerts-incidents">
+      <h2>Alerts and incidents</h2>
+      <p>An <strong>alert</strong> is one suspicious detection: its severity, risk score, the rules that fired, how many files were affected, and the incident it belongs to. Alerts are raised from a HIGH score (60 or more).</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Rule (30-second window)</th><th>Default trigger</th><th>Points</th></tr></thead>
+          <tbody>
+            <tr><td>Rapid file modification</td><td>50 modifications</td><td>25</td></tr>
+            <tr><td>Mass file rename</td><td>20 renames</td><td>25</td></tr>
+            <tr><td>Suspicious extension</td><td>1 or more renames to, for example, <code>.locked</code></td><td>20</td></tr>
+            <tr><td>Mass file creation</td><td>50 new files</td><td>15</td></tr>
+            <tr><td>High event concentration</td><td>75 events</td><td>15</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Scores map to LOW (1–29), MEDIUM (30–59), HIGH (60–79) and CRITICAL (80–100).</p>
+      <p>An <strong>incident</strong> groups the alerts from one episode into one case. On the <strong>Incidents</strong> page, active cases are listed first. Select one and press <strong>Investigate Selected</strong> (or double-click it).</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>OPEN</td><td>New; nobody has acted on it yet.</td></tr>
+            <tr><td>INVESTIGATING</td><td>You marked it as being looked into.</td></tr>
+            <tr><td>CONTAINED / QUARANTINED</td><td>A file attributed to it was contained.</td></tr>
+            <tr><td>RESOLVED</td><td>Closed after investigation.</td></tr>
+            <tr><td>DISMISSED</td><td>Closed as not a threat (for example a demo incident, or something you did yourself).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>What to do when Sentinel raises an alert</h3>
+      <ol>
+        <li>Don't panic, and don't delete anything yet. Open the incident from the <strong>Next step</strong> box or the Incidents page.</li>
+        <li>Read <em>Why this is suspicious</em> and <em>File activity</em>. Were you doing something that changes many files at once, such as renaming photos, extracting an archive or syncing a folder? Then it may be you.</li>
+        <li>If it wasn't you: disconnect from the network, run a full scan with Microsoft Defender (or your antivirus), and check your backups. Sentinel does not stop programs itself.</li>
+        <li>Record what you decided: <strong>Mark Investigating</strong>, then <strong>Mark Resolved…</strong> or <strong>Dismiss…</strong>.</li>
+      </ol>
+    </section>
+
+    <section id="investigating">
+      <h2>Investigating an incident</h2>
+      <figure class="screenshot">
+        <x-shot name="16-incident-detail" alt="Incident detail of a Safe Demo incident: forensic record verified, response options, and what was observed, with attribution UNKNOWN." sizes="(min-width: 1000px) 760px, 100vw"></x-shot>
+        <figcaption><span class="tag tag-demo">Safe Demo</span>An incident created by the Safe Demo.</figcaption>
+      </figure>
+      <ul>
+        <li><strong>Forensic record:</strong> whether the incident's stored record still matches what was committed to the audit chain.</li>
+        <li><strong>Response:</strong> where containment stands and every available action.</li>
+        <li><strong>What was observed:</strong> risk, process and attribution, files affected, first and last seen. Attribution is usually UNKNOWN: file events do not say which program made a change, and Sentinel does not guess.</li>
+        <li><strong>Why this is suspicious:</strong> the rules and points behind the score.</li>
+        <li><strong>File activity:</strong> what happened to each file, following renames as one file.</li>
+        <li><strong>Timeline:</strong> every recorded action, who did it and the real outcome.</li>
+      </ul>
+      <p>Actions: <strong>Acknowledge</strong>, <strong>Mark Investigating</strong>, <strong>Mark Resolved…</strong>, <strong>Dismiss…</strong>, <strong>Quarantine…</strong>, <strong>Trust Artifact…</strong> and <strong>Export Report…</strong>. Every action is confirmed and recorded in the incident's audit trail.</p>
+    </section>
+
+    <section id="quarantine">
+      <h2>Quarantine</h2>
+      <p>Quarantine is available only when an incident names a program file (an executable). Because attribution is usually UNKNOWN, often there is nothing to quarantine, and Sentinel says so.</p>
+      <p>Quarantining moves that file into Sentinel's quarantine store and renames it, so it no longer has an executable extension and its original path no longer resolves. This is <strong>containment, not isolation</strong>: a program running as you can still read the stored bytes, anything with higher privileges is not contained, and Sentinel does not stop the program.</p>
+      <p>To restore, select the item on the Quarantine page and press <strong>Restore Selected…</strong>. Sentinel checks that the file is byte-for-byte the one it quarantined and never overwrites an existing file.</p>
+    </section>
+
+    <section id="recovery">
+      <h2>Recovery readiness</h2>
+      <p>Sentinel cannot recover encrypted files; a backup can. The <strong>Recovery</strong> page checks whether a recent, independent copy of your data appears to exist in the backup locations you add.</p>
+      <ol>
+        <li>Press <strong>Add Backup Location…</strong> and choose the folder your backup tool writes to.</li>
+        <li>Press <strong>Re-assess</strong>. The result is RECOVERY READY, RECOVERY PARTIAL, NO VERIFIED RECOVERY SOURCE or RECOVERY UNKNOWN.</li>
+      </ol>
+      <p>This is an observation, not a recovery. Only a test restore proves that a backup works.</p>
+    </section>
+
+    <section id="diagnostics">
+      <h2>Diagnostics and audit</h2>
+      <figure class="screenshot">
+        <x-shot name="18-diagnostics" alt="The Diagnostics page with monitoring state, event counts, database state and audit chain integrity." sizes="(min-width: 1000px) 760px, 100vw"></x-shot>
+      </figure>
+      <p><strong>Diagnostics</strong> shows whether Sentinel itself is working: monitoring state, posture, events received, processed and shed, database state, retention, and the integrity of the audit chain and configuration. The audit information lives here; there is no separate audit page.</p>
+      <ul>
+        <li><strong>Verify Now</strong> re-checks the HMAC-chained audit log. A failure means stored security records may have been changed outside Sentinel.</li>
+        <li><strong>Export Diagnostics…</strong> or <strong>Copy to Clipboard</strong> for support. The export contains no keys or file contents, but it does contain file paths: look at it before sharing it.</li>
+        <li><strong>Logs</strong> lists every security action and event; <strong>File → Export Logs</strong> saves the log files.</li>
+      </ul>
+    </section>
+
+    <section id="safe-demo">
+      <h2>Safe Demo</h2>
+      <p>The <strong>Demo Center</strong> is the safe way to see, or to show someone, the whole workflow. It creates, edits and renames inert text files in its own isolated workspace inside Sentinel's data folder, and nowhere else. It encrypts nothing, touches none of your files, ends no process and changes no system setting. It is not real ransomware; everything after the synthetic files is the real product.</p>
+      <ol>
+        <li>Open <strong>Demo Center</strong> (Learn group in the sidebar).</li>
+        <li>If an earlier run left anything behind, press <strong>Reset Demo…</strong> first.</li>
+        <li>Press <strong>Start Demo</strong>. If protection is off, the demo starts monitoring and stops it again on reset.</li>
+        <li>Follow the progress list; each step turns green only when the product has actually done it.</li>
+        <li>Use the <strong>Presenting it</strong> buttons to show Activity, the Dashboard, Alerts and the incident.</li>
+        <li>Open the incident and press <strong>Acknowledge</strong>, then return and press <strong>Verify Audit Chain</strong> and <strong>Assess Recovery</strong>.</li>
+        <li>Press <strong>Reset Demo…</strong> and confirm. The synthetic files are removed and the demo incident is dismissed; records are kept.</li>
+      </ol>
+      <p><strong>Start Demo</strong> is refused while another incident is active, so a demo alert can never be merged into a real case. The demo incident has no program to attribute, so quarantine and trust are not available for it; that is the product's real attribution limit, not a demo shortcut.</p>
+    </section>
+
+    <section id="settings">
+      <h2>Settings</h2>
+      <p><strong>Settings</strong> holds the detection window, the behaviour thresholds, the risk thresholds and the alert cooldown. The defaults suit most people. Nothing changes until you press <strong>Apply</strong>; applied settings are saved and take effect immediately. Protected folders are managed on the Protected Locations page, and backup folders on the Recovery page.</p>
+    </section>
+
+    <section id="uninstalling">
+      <h2>Uninstalling</h2>
+      <p>Close Sentinel, then open <strong>Settings → Apps → Installed apps</strong> (Windows 10: <strong>Apps &amp; features</strong>), choose <strong>Ransomware Sentinel</strong> and <strong>Uninstall</strong>. The program is removed; your records in <code>%LOCALAPPDATA%\RansomwareSentinel</code> are kept on purpose (they can hold the only copy of an incident's history and of quarantined files). Delete that folder yourself if you no longer need it.</p>
+    </section>
+
+    <section id="troubleshooting">
+      <h2>Troubleshooting</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Problem</th><th>What to do</th></tr></thead>
+          <tbody>
+            <tr><td>Windows warns about the installer</td><td>See <a href="{{root}}download/#smartscreen">If Windows shows a warning</a>. Never turn off Defender or SmartScreen.</td></tr>
+            <tr><td>"Ransomware Sentinel is already running"</td><td>Only one copy can run at a time. Close the other window (check the taskbar).</td></tr>
+            <tr><td>A protected location shows Missing</td><td>Reconnect the drive or recreate the folder, then press Re-check. It stays listed.</td></tr>
+            <tr><td>A location shows No access</td><td>Sentinel runs with your permissions; choose a folder you can open.</td></tr>
+            <tr><td>Protection did not start</td><td>Read the message on the dashboard's protection panel, then open Protection to see which component failed.</td></tr>
+            <tr><td>Posture DEGRADED</td><td>Open Protection or Diagnostics; they name what is not fully working (for example a folder still being checked, or events being shed under heavy load).</td></tr>
+            <tr><td>Many alerts from OneDrive</td><td>Untick OneDrive on Protected Locations; its sync activity resembles bursts of renames.</td></tr>
+            <tr><td>Start Demo is unavailable</td><td>Resolve or dismiss active incidents first, or press Reset Demo… to clear an earlier run.</td></tr>
+            <tr><td>Audit verification failed</td><td>Records may have been changed outside Sentinel. Export Diagnostics and keep the export.</td></tr>
+            <tr><td>Setup or the tour was dismissed</td><td>Help → Run Setup Again, or Help → Guided Tour. Help → Quick Reference (F1) summarises everything.</td></tr>
+            <tr><td>Protection stopped after closing Sentinel</td><td>That is expected: Sentinel protects only while it is open. Open it again from the Start menu.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="limitations">
+      <h2>Limitations</h2>
+      <ul>
+        <li>Not antivirus, and not a replacement for Microsoft Defender or an enterprise endpoint (EDR) product.</li>
+        <li>User-mode only: no kernel driver, ETW consumer or minifilter.</li>
+        <li>Only protected locations are watched, and only while Sentinel is open; activity anywhere else is not observed.</li>
+        <li>OneDrive's sync activity can look like ransomware, which is why OneDrive is off by default.</li>
+        <li>Process attribution is usually UNKNOWN; a named program is a candidate, not proven cause.</li>
+        <li>No process termination or write blocking: Sentinel detects and records; you act.</li>
+        <li>No decryption and no recovery of encrypted files; recovery readiness only checks for a backup.</li>
+        <li>Quarantine is containment, not isolation.</li>
+        <li>The audit chain detects tampering afterwards; it cannot prevent it.</li>
+        <li>During the initial scan, monitoring is not yet running.</li>
+        <li>Only a CRITICAL incident changes the posture from PROTECTED; a HIGH incident is shown as an open incident instead.</li>
+        <li>The "start protection automatically" setting is not covered by the settings integrity check.</li>
+        <li>On small screens, the sidebar's Learn group can sit below the fold; scroll the sidebar (the guided tour does this for you).</li>
+        <li>It cannot guarantee that every ransomware family is detected.</li>
+      </ul>
+    </section>
+
+    <section id="more">
+      <h2>More documents</h2>
+      <p>For readers who want the detail behind the product:</p>
+      <ul>
+        <li><a href="{{root}}assets/docs/Ransomware-Sentinel-User-Guide.pdf">User Guide (PDF, 1.7 MB)</a>: the illustrated guide this page is based on. It was written for running Sentinel from its source code, so its "First launch" instructions differ: with the installer, simply open Sentinel from the Start menu.</li>
+        <li><a href="{{root}}assets/docs/Ransomware-Sentinel-Technical-Report.pdf">Technical Report (PDF, 0.7 MB)</a>: architecture, detection model, audit integrity, testing and limitations.</li>
+        <li><a href="{{root}}assets/docs/Ransomware-Sentinel-Presentation.pptx">Project presentation (PowerPoint, 0.7 MB)</a>: an 11-slide overview with speaker notes.</li>
+      </ul>
+      <p class="small muted">Two screenshots in the user guide and technical report (an incident after quarantine, and the Quarantine page) use documentation data: a harmless placeholder file stands in for an attributed program. They show the pages, not a real attribution.</p>
+    </section>
+  </div>
+</div>
