@@ -69,7 +69,7 @@
     </details>
     <details id="initial-scan">
       <summary>What happens during the initial scan?</summary>
-      <div><p>Each time protection starts, Sentinel lists the files already in your protected folders and flags names with encrypted-looking extensions. It never opens or changes a file. Continuous monitoring starts right after the scan; during the scan itself, monitoring is not yet running. You can skip the scan, and monitoring still starts.</p></div>
+      <div><p>Each time protection starts, Sentinel lists the files already in your protected folders and flags names with encrypted-looking extensions. It never opens or changes a file. Continuous monitoring starts first, so your folders are watched while the scan runs. You can skip the scan; monitoring keeps running.</p></div>
     </details>
     <details id="detected">
       <summary>What happens if suspicious activity is detected?</summary>
@@ -110,7 +110,7 @@
     </details>
     <details id="uninstall">
       <summary>Can I uninstall it?</summary>
-      <div><p>Yes, like any Windows app: Settings → Apps → Installed apps → Ransomware Sentinel → Uninstall. Your Sentinel records are kept in <code>%LOCALAPPDATA%\RansomwareSentinel</code> in case you need them; delete that folder if you don't.</p></div>
+      <div><p>Yes, like any Windows app: Settings → Apps → Installed apps → Ransomware Sentinel → Uninstall. Your Sentinel records are kept in <code>%LOCALAPPDATA%\RansomwareSentinel</code> in case you need them; delete that folder if you don't. (If you reinstall later, Sentinel reports the deleted history once; confirm it in Diagnostics.)</p></div>
     </details>
     <details id="update">
       <summary>How do I update?</summary>

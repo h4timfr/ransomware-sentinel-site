@@ -91,7 +91,7 @@
       </figure>
       <p>Sentinel lists the folders where your own files normally live, ticked: Desktop, Documents, Downloads, Pictures, Videos and Music. It finds them through Windows itself, so a Documents folder moved to OneDrive or another drive is found where it really is. If OneDrive is set up it is listed unticked, because its sync client creates and renames files in bursts that can raise alerts. Untick anything you don't want watched and press <strong>Continue</strong>.</p>
       <h3>Step 3: Initial scan</h3>
-      <p>Leave <em>Start protection automatically when Sentinel opens</em> ticked if you want protection to start by itself each time you open Sentinel. Press <strong>Start Protection</strong>. The <a href="#initial-scan">initial scan</a> runs; <strong>Skip Scan</strong> stops it early (monitoring still starts). When the panel says <strong>PROTECTION ACTIVE</strong>, press <strong>Continue</strong>.</p>
+      <p>Leave <em>Start protection automatically when Sentinel opens</em> ticked if you want protection to start by itself each time you open Sentinel. Press <strong>Start Protection</strong>. The <a href="#initial-scan">initial scan</a> runs; <strong>Skip Scan</strong> stops it early (monitoring keeps running). When the panel says <strong>PROTECTION ACTIVE</strong>, press <strong>Continue</strong>.</p>
       <h3>Step 4: Protection active</h3>
       <p>The last screen shows what is running and offers <strong>Take Guided Tour</strong>, <strong>Explore Dashboard</strong> or <strong>Run Safe Demo</strong>. The first time, the guided tour starts by itself unless you choose the demo.</p>
       <h3>The guided tour</h3>
@@ -130,7 +130,7 @@
           <tbody>
             <tr><td>PROTECTION OFF</td><td>Nothing is being watched. Press Start Protection.</td></tr>
             <tr><td>STARTING PROTECTION</td><td>Protected locations are being checked (at most about 15 seconds for slow network folders).</td></tr>
-            <tr><td>INITIAL SCAN</td><td>Existing files are being listed. Monitoring is not running yet.</td></tr>
+            <tr><td>INITIAL SCAN</td><td>Monitoring is running; existing files are being listed.</td></tr>
             <tr><td>PROTECTION ACTIVE</td><td>Continuous monitoring of your protected locations is running.</td></tr>
             <tr><td>STOPPING</td><td>Protection is being stopped.</td></tr>
             <tr><td>PROTECTION NOT STARTED</td><td>Something failed; the message says what (for example, no folder can be watched).</td></tr>
@@ -143,7 +143,7 @@
 
     <section id="initial-scan">
       <h2>The initial scan</h2>
-      <p>Whenever protection starts, Sentinel first lists the files already in your protected locations and checks their names for encrypted-looking extensions. It does not open, read or change any file. The scan runs <em>before</em> continuous monitoring starts, so listing files is never mistaken for ransomware activity; during the scan, monitoring is not yet running.</p>
+      <p>Whenever protection starts, Sentinel first lists the files already in your protected locations and checks their names for encrypted-looking extensions. It does not open, read or change any file. Continuous monitoring starts <em>before</em> the scan, so your folders are watched while it runs. Listing file names produces no file activity, so the scan itself is never mistaken for ransomware.</p>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Shown</th><th>Meaning</th></tr></thead>
@@ -277,7 +277,7 @@
 
     <section id="uninstalling">
       <h2>Uninstalling</h2>
-      <p>Close Sentinel, then open <strong>Settings → Apps → Installed apps</strong> (Windows 10: <strong>Apps &amp; features</strong>), choose <strong>Ransomware Sentinel</strong> and <strong>Uninstall</strong>. The program is removed; your records in <code>%LOCALAPPDATA%\RansomwareSentinel</code> are kept on purpose (they can hold the only copy of an incident's history and of quarantined files). Delete that folder yourself if you no longer need it.</p>
+      <p>Close Sentinel, then open <strong>Settings → Apps → Installed apps</strong> (Windows 10: <strong>Apps &amp; features</strong>), choose <strong>Ransomware Sentinel</strong> and <strong>Uninstall</strong>. The program is removed; your records in <code>%LOCALAPPDATA%\RansomwareSentinel</code> are kept on purpose (they can hold the only copy of an incident's history and of quarantined files). Delete that folder yourself if you no longer need it. If you install Sentinel again after deleting it, Sentinel reports the missing history once (its tamper check cannot tell a deleted folder from a wiped one); press <strong>Acknowledge Lost History…</strong> in Diagnostics to confirm it.</p>
     </section>
 
     <section id="troubleshooting">
@@ -314,9 +314,7 @@
         <li>No decryption and no recovery of encrypted files; recovery readiness only checks for a backup.</li>
         <li>Quarantine is containment, not isolation.</li>
         <li>The audit chain detects tampering afterwards; it cannot prevent it.</li>
-        <li>During the initial scan, monitoring is not yet running.</li>
         <li>Only a CRITICAL incident changes the posture from PROTECTED; a HIGH incident is shown as an open incident instead.</li>
-        <li>The "start protection automatically" setting is not covered by the settings integrity check.</li>
         <li>On small screens, the sidebar's Learn group can sit below the fold; scroll the sidebar (the guided tour does this for you).</li>
         <li>It cannot guarantee that every ransomware family is detected.</li>
       </ul>
@@ -330,6 +328,7 @@
         <li><a href="{{root}}assets/docs/Ransomware-Sentinel-Technical-Report.pdf">Technical Report (PDF, 0.7 MB)</a>: architecture, detection model, audit integrity, testing and limitations.</li>
         <li><a href="{{root}}assets/docs/Ransomware-Sentinel-Presentation.pptx">Project presentation (PowerPoint, 0.7 MB)</a>: an 11-slide overview with speaker notes.</li>
       </ul>
+      <p class="muted small">These documents were written for the previous version. Where they differ from this page (for example, monitoring now starts before the initial scan), this page and the <a href="{{releaseNotesUrl}}" rel="noopener">release notes</a> describe the current version.</p>
       <p class="small muted">Two screenshots in the user guide and technical report (an incident after quarantine, and the Quarantine page) use documentation data: a harmless placeholder file stands in for an attributed program. They show the pages, not a real attribution.</p>
     </section>
   </div>
