@@ -23,18 +23,15 @@ WIDTHS = (640, 1080, 1600)
 QUALITY = 82
 
 SHOTS = [
-    "01-setup-welcome",
+    # Curated: each answers a different question on the site. Captured from the
+    # released version under a neutral demo profile; see README "Screenshots".
     "02-setup-locations",
-    "05-setup-protection-active",
-    "06-tour-next-step",
     "08-dashboard-protection-active",
     "09-protected-locations",
-    "12-dashboard-incident",
-    "14-alerts",
+    "13-activity",
     "16-incident-detail",
     "17-demo-complete",
     "18-diagnostics",
-    "19-recovery",
 ]
 
 

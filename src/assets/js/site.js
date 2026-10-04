@@ -1,5 +1,6 @@
 // The only script on the site. Everything works without it: it adds a
-// "Copy" button beside the checksum and closes the mobile menu after a tap.
+// "Copy" button beside the checksum, closes the mobile menu after a tap and
+// collapses the documentation contents on narrow screens.
 // It makes no network requests and stores nothing.
 (() => {
   "use strict";
@@ -29,6 +30,20 @@
         menu.removeAttribute("open");
         menu.querySelector("summary").focus();
       }
+    });
+  }
+
+  // The contents list is open in the HTML so it is always reachable; on narrow
+  // screens (where it sits above the text) start it collapsed. Wide layouts hide
+  // the summary, so the list must be open there.
+  const contents = document.querySelector(".docs-nav details");
+  if (contents) {
+    const narrow = window.matchMedia("(max-width: 920px)");
+    const sync = () => { contents.open = !narrow.matches; };
+    sync();
+    narrow.addEventListener("change", sync);
+    contents.addEventListener("click", (event) => {
+      if (narrow.matches && event.target.closest("a")) contents.open = false;
     });
   }
 })();

@@ -283,13 +283,172 @@ describe("content", () => {
   });
 
   test("screenshots from the Safe Demo are labelled as such", () => {
-    for (const [page, content] of html) {
-      for (const name of ["14-alerts", "16-incident-detail", "12-dashboard-incident"]) {
-        const at = content.indexOf(`shots/${name}-`);
-        if (at === -1) continue;
-        const figure = content.slice(content.lastIndexOf("<figure", at), content.indexOf("</figure>", at));
-        assert.match(figure, /Safe Demo/, `${page}: ${name} is not labelled as Safe Demo content`);
+    // Every screenshot showing an alert, incident or demo state comes from the
+    // Safe Demo. Each must be used, and every figure that shows it labelled.
+    for (const name of ["13-activity", "16-incident-detail", "17-demo-complete", "18-diagnostics"]) {
+      let used = 0;
+      for (const [page, content] of html) {
+        for (let at = content.indexOf(`shots/${name}-`); at !== -1; at = content.indexOf(`shots/${name}-`, at + 1)) {
+          const start = content.lastIndexOf("<figure", at);
+          assert.ok(start !== -1, `${page}: ${name} is not inside a figure`);
+          const figure = content.slice(start, content.indexOf("</figure>", at));
+          assert.match(figure, /Safe Demo/, `${page}: ${name} is not labelled as Safe Demo content`);
+          used++;
+        }
       }
+      assert.ok(used > 0, `${name} is not shown on any page`);
+    }
+  });
+
+  test("every screenshot is a numbered, captioned figure with descriptive alt text", () => {
+    for (const [page, content] of html) {
+      for (const img of tags(content, "img").filter((t) => attrs(t).src?.includes("shots/"))) {
+        assert.ok(attrs(img).alt.length >= 20, `${page}: screenshot alt text too short: ${img}`);
+        const at = content.indexOf(img);
+        const figure = content.slice(content.lastIndexOf("<figure", at), content.indexOf("</figure>", at));
+        assert.match(figure, /<figcaption\b[^>]*>[\s\S]*FIG\.\s/i, `${page}: screenshot without a numbered caption`);
+      }
+    }
+  });
+
+  test("states the supported platform exactly and claims no other", () => {
+    const text = (p) => html.get(p).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    assert.ok(text("download/index.html").includes(release.windows), "download page lacks the supported Windows versions");
+    assert.ok(text("download/index.html").includes(`Tested on ${release.testedOn}`));
+    assert.ok(text("docs/index.html").includes("Windows 10 (version 1809 or later) or Windows 11, 64-bit"));
+    for (const [page] of html) {
+      if (page.startsWith("download/windows")) continue;
+      // macOS and Linux may only be mentioned to say there is no version for them.
+      for (const m of text(page).matchAll(/[^.?!]*\b(macOS|Mac OS|OS X|Linux)\b[^.?!]*[.?!]?/gi)) {
+        assert.match(m[0], /not available|no macOS or Linux version|macOS or Linux\?/i, `${page}: "${m[0].trim()}"`);
+      }
+    }
+  });
+
+  test("never claims kernel-level monitoring, EDR, automatic prevention, decryption or isolation", () => {
+    const banned = [
+      /(?<!no |not |without )\bkernel[- ](?:level|mode) (?:monitoring|protection|driver)/i,
+      /(?<!no |not |without )\bkernel driver\b/i,
+      /(?<!not (?:a replacement for )?(?:Microsoft Defender or )?an? )\bendpoint detection and response\b/i,
+      /\b(?:is|as) an EDR\b/i,
+      /\b(?:prevents|blocks|stops) ransomware\b/i,
+      /\b(?:decrypts|recovers encrypted|restores encrypted)\b/i,
+      /(?<!not )\bisolat(?:es|ed|ion)\b(?! of)/i,
+      /\bguaranteed?\b(?! that every)(?!.{0,40}\bnot\b)/i,
+      /\b(?:identifies|names) the (?:exact |responsible )?(?:program|process) (?:every time|always|with certainty)/i,
+    ];
+    for (const [page, content] of html) {
+      const text = content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+      for (const pattern of banned) {
+        const match = text.match(pattern);
+        assert.ok(!match, `${page}: "${match && text.slice(Math.max(0, match.index - 40), match.index + 60)}"`);
+      }
+    }
+  });
+});
+
+describe("public artifact hygiene", () => {
+  // The site, its repository and every published asset are public. Nothing
+  // from a developer's machine, the private application repository or an
+  // internal branch may appear in them.
+  const LEAKS = [
+    [/[A-Za-z]:[\\/]+Users[\\/]/i, "a Windows user-profile path"],
+    [/(?:^|[\s"'`(=])\/(?:Users|home)\/[\w.-]+/, "a macOS or Linux home path"],
+    [/\/mnt\/data\b/i, "a sandbox path"],
+    [/\bAppData\b/i, "an AppData path (use %LOCALAPPDATA%)"],
+    [/\blocalhost\b|\b127\.0\.0\.1\b|\[::1\]/i, "a local address"],
+    [/\b(?:feature|distribution|hotfix|bugfix|wip)\/[\w.-]+/i, "an internal branch name"],
+    [/\bSentinel(?:Site|Shots|Docs|ShotsDrive)\b/, "a capture working folder"],
+    [/\b(?:build_release|capture_screenshots)\.py\b/, "a private repository script"],
+    [/\b(?:\d{1,3}\.){3}\d{1,3}\b/, "an IP address"],
+    [/[\w.+-]+@(?!v\d)[\w-]+\.[a-z]{2,}/i, "an email address"],
+  ];
+  // Deliberate exceptions: the local preview server and its documented URL,
+  // and GitHub Actions references (actions/checkout@v4 is not an email).
+  const ALLOW = new Map([
+    ["scripts/serve.mjs", ["a local address"]],
+    ["README.md", ["a local address"]],
+    ["tests/site.test.mjs", LEAKS.map(([, what]) => what)],
+  ]);
+
+  function textFiles() {
+    const source = [...walk(join(ROOT, "src")), ...walk(join(ROOT, "scripts")), ...walk(join(ROOT, "tests")),
+      ...walk(join(ROOT, "release-notes")), ...walk(join(ROOT, ".github")), join(ROOT, "site.config.json"),
+      join(ROOT, "README.md"), join(ROOT, "package.json")].map((f) => [relative(ROOT, f).split("\\").join("/"), f]);
+    const built = walk(out).map((f) => [`dist/${relative(out, f).split("\\").join("/")}`, f]);
+    return [...source, ...built].filter(([, f]) => /\.(html|css|js|mjs|json|txt|xml|py|md|yml|svg|webmanifest)$/.test(f));
+  }
+
+  test("no local paths, addresses, branch names, emails or private names in the repository or output", () => {
+    const problems = [];
+    for (const [name, file] of textFiles()) {
+      const text = readFileSync(file, "utf8");
+      for (const [pattern, what] of LEAKS) {
+        if (ALLOW.get(name)?.includes(what)) continue;
+        const m = text.match(pattern);
+        if (m) problems.push(`${name}: ${what}: "${text.slice(Math.max(0, m.index - 30), m.index + 50).replace(/\s+/g, " ")}"`);
+      }
+    }
+    assert.deepEqual(problems, []);
+  });
+
+  test("no images carry text metadata or embedded paths", () => {
+    for (const file of walk(out).filter((f) => /\.(png|webp|jpe?g|gif|ico)$/i.test(f))) {
+      const bytes = readFileSync(file);
+      const latin = bytes.toString("latin1");
+      for (const chunk of ["tEXt", "iTXt", "zTXt", "eXIf", "EXIF", "XMP ", "<x:xmpmeta"]) {
+        assert.ok(!latin.includes(chunk), `${relative(out, file)} contains a ${chunk.trim()} metadata block`);
+      }
+      assert.ok(!/[A-Za-z]:\\Users\\|AppData|localhost/i.test(latin), `${relative(out, file)} embeds a path or address`);
+    }
+  });
+
+  test("publishes no documents, archives or executables", () => {
+    const banned = /\.(pdf|pptx?|docx?|xlsx?|odt|rtf|zip|7z|rar|exe|msi|ps1|bat|py)$/i;
+    assert.deepEqual(walk(out).filter((f) => banned.test(f)).map((f) => relative(out, f)), []);
+    assert.deepEqual(walk(join(ROOT, "src")).filter((f) => banned.test(f)).map((f) => relative(ROOT, f)), []);
+    for (const [page, content] of html) {
+      for (const tag of tags(content, "a")) {
+        const href = decode(attrs(tag).href || "");
+        if (href === release.downloadUrl || href === release.checksumUrl) continue;
+        assert.ok(!/\.(pdf|pptx?|docx?|xlsx?|zip|exe|msi)(?:[#?]|$)/i.test(href), `${page} links to a document or binary: ${href}`);
+      }
+    }
+  });
+
+  test("every published screenshot is referenced, and every referenced one exists", () => {
+    const shotsDir = join(out, "assets", "img", "shots");
+    const published = readdirSync(shotsDir).filter((f) => f.endsWith(".webp"));
+    const all = [...html.values()].join("\n");
+    for (const f of published) assert.ok(all.includes(`shots/${f}`), `${f} is published but never used`);
+    for (const m of all.matchAll(/shots\/([\w-]+\.webp)/g)) assert.ok(published.includes(m[1]), `${m[1]} is referenced but missing`);
+  });
+});
+
+describe("release facts", () => {
+  test("the release notes publish the same checksum and size as the site", () => {
+    const notes = readFileSync(join(ROOT, "release-notes", `${release.tag}.md`), "utf8");
+    assert.ok(notes.includes(release.sha256), `release notes do not list ${release.sha256}`);
+    assert.ok(notes.includes(release.sizeBytes.toLocaleString("en-US")), `release notes do not list ${release.sizeBytes} bytes`);
+    assert.match(notes, new RegExp(`Ransomware Sentinel ${release.version.replace(/\./g, "\\.")}`));
+    assert.match(notes, /Not code-signed yet/);
+  });
+
+  test("the homepage and download page show the current version, size, checksum and signing state", () => {
+    const mb = `${(release.sizeBytes / 1024 / 1024).toFixed(1)} MB`;
+    const home = html.get("index.html");
+    const download = html.get("download/index.html");
+    assert.ok(home.includes(`Ransomware Sentinel ${release.version}`), "homepage release band lacks the version");
+    assert.ok(home.includes(release.sha256), "homepage lacks the checksum");
+    assert.ok(home.includes(`${mb} · unsigned`) || release.signed, "homepage does not say the installer is unsigned");
+    assert.ok(download.includes(mb), `download page lacks the size ${mb}`);
+    assert.ok(download.includes(`Version ${release.version}`));
+    // The installer is linked directly only beside its checksum; other pages
+    // send visitors to the download page. Any direct link names this tag.
+    const assetLinks = (page) => tags(page, "a").map((t) => decode(attrs(t).href || "")).filter((h) => h.includes("/releases/download/"));
+    assert.ok(assetLinks(download).includes(release.downloadUrl), "download page does not link the installer");
+    for (const [page, content] of html) {
+      for (const href of assetLinks(content)) assert.ok(href.includes(`/download/${release.tag}/`), `${page}: ${href} is not the ${release.tag} asset`);
     }
   });
 });

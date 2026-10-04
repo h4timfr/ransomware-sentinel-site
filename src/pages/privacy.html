@@ -2,53 +2,56 @@
 {
   "path": "privacy/",
   "nav": "",
-  "title": "Privacy, license and disclaimer: Ransomware Sentinel",
-  "description": "How Ransomware Sentinel and this website handle your data, the project's license status, and an important disclaimer about what security software can and cannot do."
+  "title": "Privacy and license: Ransomware Sentinel",
+  "description": "What Ransomware Sentinel {{version}} stores and where, what this website collects (nothing of its own), the project's license status and its disclaimer."
 }
 -->
 <section class="page-head">
   <div class="wrap">
-    <span class="eyebrow">Privacy · License · Disclaimer</span>
-    <h1>Privacy and terms, in plain words</h1>
+    <p class="meta">Privacy · License · Disclaimer · version {{version}}</p>
+    <h1>Privacy</h1>
+    <p class="lede">Ransomware Sentinel works entirely on your computer. Here is exactly what it stores, and what this website does and does not collect.</p>
   </div>
 </section>
 
-<div class="wrap docs-content section">
-  <section id="app-privacy">
-    <h2>The application</h2>
-    <ul>
-      <li><strong>No account.</strong> Sentinel has no sign-up, sign-in or user database.</li>
-      <li><strong>No internet connection.</strong> The application contains no network code: it does not upload your files, file names, scan results, incidents or usage data, it has no telemetry, and it does not check for updates.</li>
-      <li><strong>What it stores, and where.</strong> Its database (events, alerts, incidents, the actions you took), audit log, settings, logs and any quarantined files are kept on your computer in <code>%LOCALAPPDATA%\RansomwareSentinel</code>, readable by your Windows account.</li>
-      <li><strong>What it looks at.</strong> File-system activity in the folders you choose (changes, renames, new files and their names), and a list of running processes to suggest which program might be involved. It does not read the contents of your files.</li>
-      <li><strong>Sharing is up to you.</strong> Nothing leaves your computer unless you export it yourself (for example <em>Export Diagnostics</em> or <em>Export Report</em>). Exports contain file paths, which can include your Windows user name; check them before sending them to anyone.</li>
-      <li><strong>Uninstalling</strong> removes the program but keeps that data folder; delete it yourself if you want it gone.</li>
-    </ul>
-  </section>
+<section class="section">
+  <div class="wrap split">
+    <div>
+      <p class="index">The application</p>
+      <h2 id="app-privacy">Everything stays on your PC</h2>
+    </div>
+    <dl class="ledger">
+      <div><dt>Network</dt><dd>None. The application makes no network connections: no uploads, no telemetry, no account and no update checks.</dd></div>
+      <div><dt>What it observes</dt><dd>File activity in the folders you protect (creations, changes, renames, deletions and file names) and a list of running processes for context. It does not read the contents of your files.</dd></div>
+      <div><dt>What it stores</dt><dd>Its database, audit chain, logs, settings and any quarantined files, in <code>%LOCALAPPDATA%\RansomwareSentinel</code>, readable by your Windows account. Uninstalling keeps this folder until you delete it.</dd></div>
+      <div><dt>Exports</dt><dd>Nothing is shared unless you save an export (diagnostics or an incident report) and send it yourself. Exports contain file paths, which can include your Windows user name; read them before sharing.</dd></div>
+    </dl>
+  </div>
+</section>
 
-  <section id="site-privacy">
-    <h2>This website</h2>
-    <ul>
-      <li>No cookies, analytics, advertising, trackers, session recording or fingerprinting.</li>
-      <li>No third-party scripts or fonts: every file the pages use comes from this site.</li>
-      <li>The site is a set of static pages hosted on GitHub Pages, and the installer is downloaded from GitHub. Like any web host, GitHub receives your IP address and browser details when you visit or download; see the <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub General Privacy Statement</a>.</li>
-    </ul>
-  </section>
+<section class="section">
+  <div class="wrap split">
+    <div>
+      <p class="index">This website</p>
+      <h2 id="site-privacy">No cookies, analytics or trackers</h2>
+    </div>
+    <dl class="ledger">
+      <div><dt>Collected by this site</dt><dd>Nothing. No cookies, analytics, advertising, session recording or fingerprinting, and no third-party scripts or fonts: every file the pages load comes from this site.</dd></div>
+      <div><dt>Hosting</dt><dd>The pages are served by GitHub Pages and the installer is downloaded from GitHub. Like any web host, GitHub receives your IP address and browser details; see the <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub General Privacy Statement</a>.</dd></div>
+    </dl>
+  </div>
+</section>
 
-  <section id="license">
-    <h2>License</h2>
-    <p>Ransomware Sentinel is offered free of charge. Its source code is not public, and no open-source license has been published for it. If a license is published in the future, it will be stated here and in the release notes.</p>
-    <p>The application uses open-source components, including Python, Qt for Python (PySide6, LGPLv3), watchdog and psutil. Each remains under its own license; their notices and license texts are installed with the program as <code>THIRD-PARTY-NOTICES.txt</code> in its folder. The Qt libraries are included as separate, unmodified files and can be replaced.</p>
-  </section>
-
-  <section id="disclaimer">
-    <h2>Disclaimer</h2>
-    <p>Ransomware Sentinel is security software that detects ransomware-like behaviour in the folders you choose while it is running. It is not antivirus, it does not block programs or file changes, and it cannot decrypt or recover files. No security product can guarantee that every attack is detected or prevented, and this one does not claim to.</p>
-    <p>Use it alongside Microsoft Defender (or another antivirus), Windows updates and regular, tested backups of the files that matter to you. It is provided as is, without warranty of any kind.</p>
-  </section>
-
-  <section id="contact">
-    <h2>Contact and security reports</h2>
-    <p>There is no dedicated support or security contact address. To report a problem, open an issue in the <a href="{{publicRepoUrl}}/issues" rel="noopener">public GitHub repository</a>. For a security vulnerability, open an issue asking for a private way to share the details instead of posting them publicly. Please never attach personal files.</p>
-  </section>
-</div>
+<section class="section">
+  <div class="wrap split">
+    <div>
+      <p class="index">Terms</p>
+      <h2 id="license">License and disclaimer</h2>
+    </div>
+    <div class="prose">
+      <p>Ransomware Sentinel is offered free of charge. Its source code is not public and no open-source license has been published for it; if one is, it will be stated here and in the release notes. It includes open-source components (Python, Qt for Python under LGPLv3, watchdog and psutil), each under its own license; their notices are installed with the program as <code>THIRD-PARTY-NOTICES.txt</code>.</p>
+      <p id="disclaimer">Sentinel detects ransomware-like behaviour in the folders you choose while it is running. It is not antivirus, it does not block programs or file changes, and it cannot decrypt or recover files. No security product can guarantee that every attack is detected or prevented, and this one does not claim to. It is provided as is, without warranty of any kind. Use it alongside Microsoft Defender, Windows updates and tested backups.</p>
+      <p id="contact">There is no support or security contact address. Report problems through <a href="{{publicRepoUrl}}/issues" rel="noopener">GitHub issues</a>; for a vulnerability, open an issue asking for a private channel rather than posting details.</p>
+    </div>
+  </div>
+</section>

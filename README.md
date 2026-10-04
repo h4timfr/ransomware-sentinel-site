@@ -15,13 +15,13 @@ assets).
 ## How it fits together
 
 ```
-private application repository             public: this repository
-──────────────────────────────             ───────────────────────────────────
-release tag (v1.3.0)                       GitHub release v1.3.0
-  └─ scripts/build_release.py  ──upload──►   RansomwareSentinel-Setup.exe
-       clean worktree of the tag              RansomwareSentinel-Setup.exe.sha256
-       PyInstaller + Inno Setup             site.config.json (version, URL, SHA-256, size)
-       self-check, audit, SHA-256             └─ GitHub Pages: the website
+application repository (private)           this repository (public)
+────────────────────────────────           ───────────────────────────────────
+release tag vX.Y.Z                         GitHub release vX.Y.Z
+  └─ installer build  ─────upload─────►      RansomwareSentinel-Setup.exe
+                                             RansomwareSentinel-Setup.exe.sha256
+                                           site.config.json (version, URL, SHA-256, size)
+                                             └─ GitHub Pages: the website
 ```
 
 Visitors never touch the private repository: the site and the installer are
@@ -34,12 +34,12 @@ both served from this public one, anonymously, over HTTPS.
 | `site.config.json` | **The only place release facts live:** version, date, download URL, SHA-256, size, signed or not, supported Windows. |
 | `src/pages/` | One HTML fragment per page, with a small JSON header (title, description, path). |
 | `src/partials/layout.html` | Shared head, header, footer and the security policy. |
-| `src/assets/` | CSS, the one small script, images, screenshots and the PDF documents. |
+| `src/assets/` | CSS, the one small script, icons, the social preview image and the screenshots. |
 | `scripts/build.mjs` | The build (Node, no dependencies) → `dist/`. |
 | `scripts/check-release.mjs` | Verifies the config against the installer file or the published release. |
 | `scripts/optimize-images.py` | Turns application screenshots into the responsive WebP files. |
 | `scripts/serve.mjs` | Local preview at the same path GitHub Pages uses. |
-| `tests/site.test.mjs` | Links, assets, accessibility basics, security policy, download, version and claims. |
+| `tests/site.test.mjs` | Links, assets, accessibility basics, security policy, download, version, claims and leak checks. |
 | `release-notes/` | The text of each GitHub release. |
 | `.github/workflows/site.yml` | Test, verify the published installer, deploy to Pages. |
 
@@ -56,20 +56,22 @@ npm run serve            # -> http://localhost:4173/ransomware-sentinel-site/
 Keep the site honest. The tests reject claims the product can't back up
 ("100%", "detects all ransomware", "military-grade", ...), any version other
 than the current one, inline scripts or styles, third-party resources,
-anything that tracks visitors, local paths, secrets, and any link to the
-private source repository. Screenshots of Safe Demo content must be labelled.
+anything that tracks visitors, secrets, and any link to the private source
+repository. They also scan the repository and the built site for anything
+from a developer's machine: user-profile, home and application-data paths, local
+addresses, IP and email addresses, internal branch names and image metadata.
+No PDFs, Office documents or archives are published. Screenshots of Safe Demo
+content must be labelled.
 
 ## Publishing a release
 
-1. **Build the installer** in the private repository (see its
-   `installer/README.md`):
-   `scripts\build_release.py --tag vX.Y.Z` → `installer\out\X.Y.Z\`.
-   Test it on Windows: install, first-run setup, protection, Safe Demo,
-   uninstall.
+1. **Build the installer** from the release tag in the application
+   repository, following its own release instructions. Test it on Windows:
+   install, first-run setup, protection, Safe Demo, uninstall.
 2. **Write the release notes** in `release-notes/vX.Y.Z.md`.
 3. **Update `site.config.json`**: `version`, `tag`, `date`, the three URLs
-   (they contain the tag), `sha256` and `sizeBytes` from
-   `release-manifest.json`, and `signed`. Then check it against the file:
+   (they contain the tag), `sha256` and `sizeBytes` of the installer, and
+   `signed`. Then check it against the file:
    ```
    npm run check:release -- --file PATH\TO\RansomwareSentinel-Setup.exe
    npm test
@@ -90,10 +92,13 @@ stable address that always forwards to the current installer.
 
 ## Screenshots
 
-The screenshots are captured from the real application by
-`scripts/capture_screenshots.py` in the private repository (a throwaway
-profile, the real first-run, protection and Safe Demo flows; no real user
-names or files). Then:
+The screenshots are full-window captures of the released version of the
+application, taken under a throwaway demo profile through the real first-run,
+protection and Safe Demo flows. Before publishing one, check that it shows the
+current version and no real user name, machine name, path, file or branch
+name. Anything showing an alert or incident must come from the Safe Demo and
+is labelled as such on the page. Only the screenshots listed in
+`scripts/optimize-images.py` are published:
 
 ```
 python -m pip install pillow

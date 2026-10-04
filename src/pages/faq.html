@@ -2,134 +2,104 @@
 {
   "path": "faq/",
   "nav": "faq",
-  "title": "Frequently asked questions: Ransomware Sentinel",
-  "description": "Answers about Ransomware Sentinel: price, accounts, privacy, protected folders, OneDrive, Windows Defender, the initial scan, alerts, uninstalling, offline use and Windows SmartScreen."
+  "title": "FAQ: Ransomware Sentinel",
+  "description": "Short answers about Ransomware Sentinel {{version}}: what it monitors, Microsoft Defender, privacy and offline use, what happens on detection, the Safe Demo, SmartScreen and signing, supported Windows versions and the source code."
 }
 -->
 <section class="page-head">
   <div class="wrap">
-    <span class="eyebrow">FAQ</span>
-    <h1>Frequently asked questions</h1>
-    <p class="lead">Short, straight answers. For step-by-step help, see the <a href="{{root}}docs/">documentation</a>.</p>
+    <p class="meta">FAQ · version {{version}}</p>
+    <h1>Questions, answered briefly</h1>
+    <p class="lede">For step-by-step help and the technical detail, see the <a href="{{root}}docs/">documentation</a>.</p>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap"><div class="faq">
-    <h2>The basics</h2>
-    <details id="free">
-      <summary>Is Ransomware Sentinel free?</summary>
-      <div><p>Yes. There is no price, no subscription, no trial period and no account.</p></div>
-    </details>
-    <details id="account">
-      <summary>Does it require an account?</summary>
-      <div><p>No. You install it and use it. There is nothing to sign up for or sign in to.</p></div>
-    </details>
-    <details id="what">
-      <summary>What does it actually do?</summary>
-      <div>
-        <p>It watches the folders you choose for the behaviour ransomware leaves behind (bursts of changes, mass renaming, files renamed to extensions such as <code>.locked</code>), scores that activity from 0 to 100, explains every point, groups related alerts into an incident, and helps you investigate and respond. It also checks itself and keeps a tamper-evident record of what it saw and what you did.</p>
-      </div>
+    <h2>Basics</h2>
+    <details id="monitor">
+      <summary>What does Sentinel monitor?</summary>
+      <div><p>File and folder creation, modification, deletion and renames inside the folders you protect, plus a periodic list of running processes for context. During the initial scan it reads file <em>names</em>. It never opens or reads the contents of your files. <a href="{{root}}#how-it-works">What it watches</a></p></div>
     </details>
     <details id="defender">
-      <summary>Does it replace Windows Defender or my antivirus?</summary>
-      <div><p>No. Ransomware Sentinel is not antivirus: it does not scan programs for malware, and it does not stop programs or block file changes. Keep Microsoft Defender (or your antivirus) turned on and keep backups. Sentinel adds a focused layer that watches your personal folders and explains ransomware-like behaviour.</p></div>
+      <summary>Does it replace Microsoft Defender?</summary>
+      <div><p>No. Sentinel is not antivirus: it does not scan programs for malware and does not block anything. Keep Microsoft Defender (or your antivirus) on and keep backups; Sentinel is an extra layer that explains ransomware-like behaviour in your folders.</p></div>
     </details>
-    <details id="backups">
-      <summary>Do I still need backups?</summary>
-      <div><p>Yes. Sentinel cannot decrypt or recover files. A backup is what gets your files back. Sentinel's Recovery page can check that a recent backup appears to exist in the folder your backup tool writes to.</p></div>
+    <details id="free">
+      <summary>Is it free? Do I need an account?</summary>
+      <div><p>It is free, and there is no account, subscription or sign-in.</p></div>
+    </details>
+    <details id="platforms">
+      <summary>Which versions of Windows are supported? macOS or Linux?</summary>
+      <div><p>{{windows}}, tested on {{testedOn}}. There is no macOS or Linux version, and Windows on Arm has not been tested.</p></div>
     </details>
 
-    <h2>Privacy</h2>
-    <details id="upload">
-      <summary>Does it upload my files?</summary>
-      <div><p>No. Sentinel has no internet features at all. It does not upload files, file names, scan results or usage data, and it has no telemetry. Its records stay in <code>%LOCALAPPDATA%\RansomwareSentinel</code> in your user profile.</p></div>
-    </details>
+    <h2>Privacy and data</h2>
     <details id="offline">
-      <summary>Does it work offline?</summary>
-      <div><p>Yes, completely. Detection runs on your computer and needs no connection. (It also means Sentinel does not update itself: newer versions are published on the <a href="{{root}}download/">download page</a>.)</p></div>
+      <summary>Does anything leave my computer? Does it work offline?</summary>
+      <div><p>Nothing leaves your computer. The application makes no network connections: no uploads, no telemetry, no update checks, and it works fully offline. Files leave only if you save an export and send it yourself. <a href="{{root}}privacy/">Privacy</a></p></div>
     </details>
-    <details id="read-files">
-      <summary>Does it read my documents?</summary>
-      <div><p>No. It watches file-system activity (changes, renames, new files) in your protected folders and checks file <em>names</em> during the initial scan. It does not open or read the contents of your files.</p></div>
+    <details id="storage">
+      <summary>Where is my data stored?</summary>
+      <div><p>In <code>%LOCALAPPDATA%\RansomwareSentinel</code> in your user profile: the database, the audit chain, logs, settings and the quarantine store. Uninstalling keeps it until you delete it. <a href="{{root}}docs/#storage">Data storage</a></p></div>
     </details>
 
-    <h2>Protection</h2>
-    <details id="folders">
-      <summary>What folders does it protect?</summary>
-      <div><p>By default Desktop, Documents, Downloads, Pictures, Videos and Music, found through Windows, so redirected folders are found where they really are. You can untick any of them and add other folders. Folders you haven't chosen are not watched.</p></div>
-    </details>
-    <details id="onedrive">
-      <summary>Does it work with OneDrive?</summary>
-      <div><p>Sentinel detects OneDrive and lists it, but leaves it <strong>off</strong> by default: the OneDrive sync client creates and renames files in bursts that can look like ransomware and raise alerts. You can switch it on in Protected Locations. If your Documents or Desktop folder has been moved into OneDrive, Sentinel finds and protects it where it is.</p></div>
-    </details>
-    <details id="always-on">
-      <summary>Does it run all the time?</summary>
-      <div><p>It protects while it is open. Closing the window stops protection, and Sentinel does not start with Windows by itself. Open it from the Start menu when you start your computer; with <em>Start protection automatically when Sentinel opens</em> ticked, it starts watching straight away.</p></div>
-    </details>
-    <details id="initial-scan">
-      <summary>What happens during the initial scan?</summary>
-      <div><p>Each time protection starts, Sentinel lists the files already in your protected folders and flags names with encrypted-looking extensions. It never opens or changes a file. Continuous monitoring starts first, so your folders are watched while the scan runs. You can skip the scan; monitoring keeps running.</p></div>
-    </details>
+    <h2>Detection and response</h2>
     <details id="detected">
-      <summary>What happens if suspicious activity is detected?</summary>
-      <div>
-        <p>Sentinel raises an alert (from a risk score of 60), opens an incident and shows it on the dashboard's <em>Next step</em>. The incident explains which rules fired and what happened to each file. Sentinel does not stop programs itself: you decide what to do, and it records each step.</p>
-        <p>If you weren't doing something that changes many files at once, disconnect from the network, run a full scan with your antivirus and check your backups. The <a href="{{root}}docs/#alerts-incidents">documentation</a> has the details.</p>
-      </div>
+      <summary>What happens when suspicious activity is detected?</summary>
+      <div><p>At a risk score of 60 or more Sentinel raises an alert, groups it into an incident and shows it on the dashboard's <em>Next step</em>. The incident lists the rules that fired and what happened to each file. You decide the response, and Sentinel records it. <a href="{{root}}docs/#incidents">Alerts and incidents</a></p></div>
+    </details>
+    <details id="automatic">
+      <summary>Does it automatically delete, block or quarantine files?</summary>
+      <div><p>No. Sentinel never deletes, blocks or ends anything by itself. Quarantine happens only when you choose it, and only for a program file an incident names; it is containment, not isolation.</p></div>
     </details>
     <details id="which-program">
       <summary>Will it tell me which program caused it?</summary>
-      <div><p>Usually not. Windows file events don't say which program made a change, so attribution is normally UNKNOWN, and Sentinel says so rather than guessing. When it does name a candidate program, that is a lead, not proof.</p></div>
+      <div><p>Usually not. Windows file events do not say which program made a change, so attribution is normally UNKNOWN, and Sentinel says so rather than guessing. A program it does name is a lead, not proof.</p></div>
     </details>
     <details id="guarantee">
       <summary>Can it stop every ransomware attack?</summary>
-      <div><p>No, and no honest tool can promise that. Sentinel detects ransomware-like behaviour in the folders it watches while it is open. It can't guarantee every attack is detected, and it doesn't block anything itself. That is why it belongs alongside antivirus and backups.</p></div>
+      <div><p>No, and no honest tool can promise that. Detection is rate-based: files encrypted in place without renaming, or slowly enough that no 30-second window looks unusual, can stay below an alert. That is why it belongs alongside antivirus and backups. <a href="{{root}}docs/#limitations">Limitations</a></p></div>
     </details>
     <details id="demo">
-      <summary>How can I see it working without real ransomware?</summary>
-      <div><p>Use the Demo Center. It creates and renames harmless text files in its own isolated folder so you can watch a real detection, alert and incident. It encrypts nothing and touches none of your files.</p></div>
+      <summary>What is the Safe Demo?</summary>
+      <div><p>A built-in demonstration that creates and renames inert text files in Sentinel's own workspace, so you can watch a real detection, alert and incident. It encrypts nothing and touches none of your files. <a href="{{root}}docs/#safe-demo">Safe Demo</a></p></div>
+    </details>
+    <details id="onedrive">
+      <summary>Does it work with OneDrive?</summary>
+      <div><p>OneDrive is detected and listed but off by default, because its sync client renames files in bursts that look like an attack. Folders Windows has redirected into OneDrive, such as Documents, are found and watched where they are.</p></div>
+    </details>
+    <details id="always-on">
+      <summary>Does it run all the time?</summary>
+      <div><p>Only while it is open. It does not start with Windows on its own; open it when you start your computer and it can start protection automatically. If it is closed or ends, nothing is watched until you open it again.</p></div>
     </details>
 
     <h2>Installing</h2>
-    <details id="windows-versions">
-      <summary>What Windows versions are supported?</summary>
-      <div><p>{{windows}}. It has been tested on {{testedOn}}. Windows on Arm PCs have not been tested.</p></div>
-    </details>
     <details id="smartscreen">
-      <summary>What if Windows SmartScreen shows a warning?</summary>
-      <div><p>The installer isn't code-signed yet and is a new download, so SmartScreen may say "Windows protected your PC". Check that you downloaded it from this site and, if you like, that its <a href="{{root}}download/#verify">SHA-256 checksum</a> matches. The <a href="{{root}}download/#smartscreen">download page</a> explains the options. Never switch off Defender or SmartScreen to install anything.</p></div>
+      <summary>Why does Windows SmartScreen warn me? Is the installer signed?</summary>
+      <div><p>The installer is not code-signed yet, so SmartScreen cannot confirm its publisher and may show an "unrecognized app" warning. Make sure you downloaded it from this site and that its SHA-256 matches the published value. Never switch off Defender or SmartScreen to install anything. <a href="{{root}}download/#smartscreen">What to check</a></p></div>
     </details>
     <details id="admin">
       <summary>Do I need administrator rights?</summary>
-      <div><p>Only to install for all users (the recommended option). You can choose to install just for yourself without administrator rights. Running Sentinel never needs them.</p></div>
-    </details>
-    <details id="python">
-      <summary>Do I need Python or any other software?</summary>
-      <div><p>No. The installer contains everything Sentinel needs.</p></div>
-    </details>
-    <details id="uninstall">
-      <summary>Can I uninstall it?</summary>
-      <div><p>Yes, like any Windows app: Settings → Apps → Installed apps → Ransomware Sentinel → Uninstall. Your Sentinel records are kept in <code>%LOCALAPPDATA%\RansomwareSentinel</code> in case you need them; delete that folder if you don't. (If you reinstall later, Sentinel reports the deleted history once; confirm it in Diagnostics.)</p></div>
+      <div><p>Only to install for all users. You can install just for yourself without them, and running Sentinel never needs them.</p></div>
     </details>
     <details id="update">
-      <summary>How do I update?</summary>
-      <div><p>Download the newer installer from the <a href="{{root}}download/">download page</a> and run it. It replaces the program and keeps your settings and records.</p></div>
+      <summary>How do I update or uninstall?</summary>
+      <div><p>To update, run the newer installer; your settings and records are kept. To uninstall, use Settings → Apps → Installed apps. <a href="{{root}}docs/#updating">Details</a></p></div>
     </details>
 
-    <h2>About the project</h2>
+    <h2>The project</h2>
     <details id="source">
-      <summary>Is the source code available?</summary>
-      <div><p>Not at the moment. The application's source code is kept in a private repository, and no open-source license has been published. This website and the installer releases are public on <a href="{{publicRepoUrl}}" rel="noopener">GitHub</a>. The <a href="{{root}}assets/docs/Ransomware-Sentinel-Technical-Report.pdf">technical report</a> describes how Sentinel works in detail.</p></div>
+      <summary>Can I inspect the source?</summary>
+      <div><p>Not at present: the application's source code is not public and no open-source license has been published. This website and the installer releases are public on <a href="{{publicRepoUrl}}" rel="noopener">GitHub</a>, and the <a href="{{root}}docs/#technical">technical reference</a> describes how Sentinel works.</p></div>
     </details>
     <details id="who">
       <summary>Who makes it?</summary>
-      <div><p>Ransomware Sentinel is an independent academic cybersecurity project. It is not a company product, and it has no certifications or commercial support.</p></div>
+      <div><p>Ransomware Sentinel is an independent academic security project, not a company product. It has no certifications and no commercial support.</p></div>
     </details>
     <details id="problem">
-      <summary>How do I report a problem?</summary>
-      <div><p>Open an issue in the <a href="{{publicRepoUrl}}/issues" rel="noopener">project's public GitHub repository</a>. Please don't include personal files, and remember that a diagnostics export contains file paths. To report a security vulnerability, open an issue asking for a private way to share the details, rather than posting them publicly.</p></div>
+      <summary>How do I report a problem or a vulnerability?</summary>
+      <div><p>Open an issue in the <a href="{{publicRepoUrl}}/issues" rel="noopener">GitHub repository</a>. Don't attach personal files, and remember a diagnostics export contains file paths. For a vulnerability, open an issue asking for a private way to share the details instead of posting them.</p></div>
     </details>
-  </div>
-  </div>
+  </div></div>
 </section>

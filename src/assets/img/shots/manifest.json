@@ -1,35 +1,10 @@
 {
-  "01-setup-welcome": {
-    "width": 1080,
-    "height": 840,
-    "widths": [
-      640,
-      1080
-    ]
-  },
   "02-setup-locations": {
     "width": 1080,
     "height": 840,
     "widths": [
       640,
       1080
-    ]
-  },
-  "05-setup-protection-active": {
-    "width": 1080,
-    "height": 840,
-    "widths": [
-      640,
-      1080
-    ]
-  },
-  "06-tour-next-step": {
-    "width": 2160,
-    "height": 1350,
-    "widths": [
-      640,
-      1080,
-      1600
     ]
   },
   "08-dashboard-protection-active": {
@@ -50,16 +25,7 @@
       1600
     ]
   },
-  "12-dashboard-incident": {
-    "width": 2160,
-    "height": 1350,
-    "widths": [
-      640,
-      1080,
-      1600
-    ]
-  },
-  "14-alerts": {
+  "13-activity": {
     "width": 2160,
     "height": 1350,
     "widths": [
@@ -87,15 +53,6 @@
     ]
   },
   "18-diagnostics": {
-    "width": 2160,
-    "height": 1350,
-    "widths": [
-      640,
-      1080,
-      1600
-    ]
-  },
-  "19-recovery": {
     "width": 2160,
     "height": 1350,
     "widths": [
