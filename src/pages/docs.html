@@ -3,14 +3,14 @@
   "path": "docs/",
   "nav": "docs",
   "title": "Documentation: Ransomware Sentinel",
-  "description": "Install and use Ransomware Sentinel {{version}}: first-run setup, protected locations, incidents, quarantine, diagnostics, the Safe Demo, and a technical reference covering architecture, data storage, the integrity model and limitations."
+  "description": "Install and use Ransomware Sentinel {{version}}: first-run setup, protected locations, incidents, quarantine, diagnostics, the Safe Demo, and a technical reference covering architecture, data storage and the integrity model."
 }
 -->
 <section class="page-head">
   <div class="wrap">
     <p class="meta">Documentation · version {{version}}</p>
     <h1>Documentation</h1>
-    <p class="lede">Getting started takes a few minutes. The rest is reference: what each screen means, how Sentinel is built, where it keeps its data, and where its limits are.</p>
+    <p class="lede">Getting started takes a few minutes. The rest is reference: what each screen means, how Sentinel is built and where it keeps its data.</p>
   </div>
 </section>
 
@@ -29,7 +29,7 @@
         </ul>
         <h2>Using Sentinel</h2>
         <ul>
-          <li><a href="#scoring">Detection and scoring</a></li>
+          <li><a class="out" href="{{root}}how-it-works/">How detection works</a></li>
           <li><a href="#incidents">Alerts and incidents</a></li>
           <li><a href="#posture">Security posture</a></li>
           <li><a href="#quarantine">Quarantine and restore</a></li>
@@ -39,15 +39,13 @@
         </ul>
         <h2>Technical reference</h2>
         <ul>
-          <li><a href="#technical">Architecture</a></li>
-          <li><a href="#monitoring-model">Monitoring model</a></li>
+          <li><a href="#architecture">Architecture</a></li>
           <li><a href="#storage">Data storage</a></li>
           <li><a href="#integrity">Integrity model</a></li>
-          <li><a href="#limitations">Limitations</a></li>
+          <li><a class="out" href="{{root}}how-it-works/#limitations">Limitations</a></li>
         </ul>
-        <h2>Release and help</h2>
+        <h2>Help</h2>
         <ul>
-          <li><a href="#release">Current release</a></li>
           <li><a href="#updating">Updating and uninstalling</a></li>
           <li><a href="#troubleshooting">Troubleshooting</a></li>
         </ul>
@@ -138,19 +136,9 @@
     <div class="docs-group" id="using">
       <p class="index">B — Using Sentinel</p>
 
-      <section id="scoring">
-        <h2>Detection and scoring</h2>
-        <p>Five rules, a 30-second sliding window and a 0–100 score: the rules, their thresholds and points, and the four risk levels are set out once, in <a href="{{root}}#detection">How it decides</a>. In operation:</p>
-        <ul>
-          <li>Each file event is scored on arrival. The score is the sum of the rules currently over their thresholds, never more than 100.</li>
-          <li>A score of 60 (HIGH) or more raises an <strong>alert</strong>. Alerts from one episode are grouped into one <strong>incident</strong>; a cooldown stops a single burst from raising dozens of alerts.</li>
-          <li>Ordinary bursts (saving many photos, extracting an archive, a sync client catching up) can raise alerts. That is why every alert carries its reasons.</li>
-        </ul>
-      </section>
-
       <section id="incidents">
         <h2>Alerts and incidents</h2>
-        <p>Open an incident from the dashboard's <strong>Next step</strong> or the Incidents page. It shows the forensic record's status, the response options, what was observed (risk, attribution, files affected, first and last seen), why it is suspicious, what happened to each file, and a timeline of every action.</p>
+        <p>A risk score of 60 (HIGH) or more raises an alert, and alerts from one episode are grouped into one incident. <a href="{{root}}how-it-works/">How it works</a> explains the signals, the score and the bands. Open an incident from the dashboard's <strong>Next step</strong> or the Incidents page. It shows the forensic record's status, the response options, what was observed (risk, attribution, files affected, first and last seen), why it is suspicious, what happened to each file, and a timeline of every action.</p>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
@@ -190,14 +178,7 @@
 
       <section id="diagnostics">
         <h2>Diagnostics</h2>
-        <figure class="figure">
-          <div class="frame">
-            <div class="frame-bar" aria-hidden="true"><span>Diagnostics</span><span>FIG. D2</span></div>
-            <x-shot name="18-diagnostics" alt="The Diagnostics page: monitoring RUNNING, posture PROTECTED, current risk 60 of 100, 7 of 7 scopes watched, 186 events received and processed, no telemetry loss, database ACTIVE, every write committed." sizes="(min-width: 1000px) 640px, 100vw"></x-shot>
-          </div>
-          <figcaption><span class="meta">Fig. D2</span><span><span class="chip chip-demo">Safe Demo</span>Did every observed event reach detection, and was every record written?</span></figcaption>
-        </figure>
-        <p><strong>Diagnostics</strong> answers whether Sentinel itself is working: monitoring state, events received, processed and shed, peak backlog, database state, writes lost, and the integrity of the audit chain and configuration.</p>
+        <p><strong>Diagnostics</strong> (<a href="{{root}}#evidence">shown on the home page</a>) answers whether Sentinel itself is working: monitoring state, events received, processed and shed, peak backlog, database state, writes lost, and the integrity of the audit chain and configuration.</p>
         <ul>
           <li><strong>Verify Now</strong> re-checks the audit chain. A failure means stored security records changed outside Sentinel.</li>
           <li><strong>Acknowledge Lost History…</strong> appears only when history is missing and every remaining record verifies (for example after you deleted the data folder yourself). The acknowledgement is itself recorded.</li>
@@ -228,12 +209,6 @@
         </dl>
       </section>
 
-      <section id="monitoring-model">
-        <h2>Monitoring model</h2>
-        <p>Observed: file and folder creation, modification, deletion and renames inside protected locations, with their paths; and, during the initial scan, the names of files already there. Not observed: file contents, activity outside protected locations, network traffic, the registry, and which process performed an operation. Monitoring runs only while Sentinel is open.</p>
-        <p>Names Windows allows but that cannot be represented exactly (for example unpaired UTF-16 surrogates) are recorded with a replacement character, and Sentinel will not act on a file whose recorded name may refer to a different file.</p>
-      </section>
-
       <section id="storage">
         <h2>Data storage</h2>
         <p>Everything Sentinel records stays in <code>%LOCALAPPDATA%\RansomwareSentinel</code> in your user profile, never in the program folder:</p>
@@ -255,38 +230,15 @@
         </ul>
       </section>
 
-      <section id="limitations">
-        <h2>Limitations</h2>
-        <ul>
-          <li>Not antivirus, and not a replacement for Microsoft Defender or an endpoint detection and response (EDR) product.</li>
-          <li>User mode only: no kernel driver, ETW consumer or file-system minifilter. Only protected locations are watched, and only while Sentinel is open.</li>
-          <li>Detection is heuristic and rate-based. Files encrypted in place without renaming, or slowly enough that no 30-second window looks unusual, stay below an alert (in-place encryption reaches at most MEDIUM). Novel behaviour may not match any rule.</li>
-          <li>Process attribution is usually UNKNOWN; a named program is a candidate, not proven cause.</li>
-          <li>No blocking, process termination or write prevention: Sentinel detects and records; you act.</li>
-          <li>No decryption or recovery of encrypted files. Recovery readiness only checks that a backup appears to exist.</li>
-          <li>Quarantine is containment, not isolation.</li>
-          <li>OneDrive's sync activity can look like ransomware, which is why OneDrive is off by default.</li>
-          <li>Under a flood of file activity beyond what it can analyse, Sentinel sheds routine events and reports it; the window can pause for a few seconds at the peak.</li>
-          <li>After a crash or if it is ended, nothing is watched until Sentinel is opened again.</li>
-          <li>The installer is not code-signed yet.</li>
-        </ul>
+      <section id="unicode-names">
+        <h2>Unusual file names</h2>
+        <p>Names Windows allows but that cannot be represented exactly (for example unpaired UTF-16 surrogates) are recorded with a replacement character, and Sentinel will not act on a file whose recorded name may refer to a different file.</p>
+        <p>What is and is not observed, and every limitation, are listed in <a href="{{root}}how-it-works/#observe">How it works</a>.</p>
       </section>
     </div>
 
     <div class="docs-group" id="release-help">
-      <p class="index">D — Release and help</p>
-
-      <section id="release">
-        <h2>Current release</h2>
-        <dl class="ledger">
-          <div><dt>Version</dt><dd>{{version}}, released {{releaseDate}}</dd></div>
-          <div><dt>Platforms</dt><dd>{{windows}}. Tested on {{testedOn}}.</dd></div>
-          <div><dt>Installer</dt><dd><code>{{installerFile}}</code>, {{size}}, published as a GitHub release asset</dd></div>
-          <div><dt>SHA-256</dt><dd><span class="hash">{{sha256}}</span></dd></div>
-          <div><dt>Signing</dt><dd>Not code-signed yet. <a href="{{root}}download/#verify">How to verify the file</a>.</dd></div>
-          <div><dt>Changes</dt><dd><a href="{{releaseNotesUrl}}" rel="noopener">Release notes for {{version}}</a></dd></div>
-        </dl>
-      </section>
+      <p class="index">D — Help</p>
 
       <section id="updating">
         <h2>Updating and uninstalling</h2>

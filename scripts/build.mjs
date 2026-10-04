@@ -78,6 +78,33 @@ function renderShots(html, shots, root, file) {
   });
 }
 
+// Platforms other than Windows are presented from site.config.json
+// ("platforms"). A platform is offered for download only when its status is
+// "available" and its release facts are complete; anything else renders as a
+// "coming soon" card with no download.
+const PLATFORM_FIELDS = ["version", "downloadUrl", "sha256", "sizeBytes", "requirements"];
+
+export function platformVars(config) {
+  const macos = config.platforms?.macos ?? { status: "coming-soon" };
+  if (!["available", "coming-soon"].includes(macos.status)) {
+    throw new Error(`platforms.macos.status must be "available" or "coming-soon", not "${macos.status}"`);
+  }
+  if (macos.status !== "available") return { macosAvailable: false };
+  const missing = PLATFORM_FIELDS.filter((f) => !macos[f]);
+  if (missing.length) throw new Error(`platforms.macos is "available" but lacks ${missing.join(", ")}`);
+  if (!macos.downloadUrl.startsWith(`${config.publicRepoUrl}/releases/download/`)) {
+    throw new Error("platforms.macos.downloadUrl must be a public release asset");
+  }
+  return {
+    macosAvailable: true,
+    macosVersion: macos.version,
+    macosDownloadUrl: macos.downloadUrl,
+    macosSha256: macos.sha256,
+    macosSize: formatSize(macos.sizeBytes),
+    macosRequirements: macos.requirements,
+  };
+}
+
 function relativeRoot(outPath) {
   const depth = outPath.split("/").length - 1;
   return depth === 0 ? "./" : "../".repeat(depth);
@@ -103,12 +130,15 @@ export function build({ config = loadConfig(), outDir = DIST, quiet = false } = 
     releaseNotesUrl: release.releaseNotesUrl,
     sha256: release.sha256,
     size: formatSize(release.sizeBytes),
+    sizeBytes: release.sizeBytes ? `${release.sizeBytes.toLocaleString("en-US")} bytes` : "",
     signed: release.signed,
     architecture: release.architecture,
     windows: release.windows,
     testedOn: release.testedOn,
     year: new Date().getUTCFullYear(),
+    ...platformVars(config),
   };
+  const platformsPartial = readFileSync(join(SRC, "partials", "platforms.html"), "utf8");
 
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
@@ -133,9 +163,17 @@ export function build({ config = loadConfig(), outDir = DIST, quiet = false } = 
       robots: meta.path === "404" ? "noindex" : "index, follow",
       bodyClass: meta.bodyClass || "",
     };
-    for (const nav of ["home", "product", "how", "docs", "download", "faq"]) {
+    for (const nav of ["home", "how", "docs", "download", "faq"]) {
       vars[`nav_${nav}`] = meta.nav === nav ? "page" : "false";
     }
+    // The platform cards: the download page links the installer directly,
+    // beside its checksum; everywhere else leads to the download page.
+    const direct = meta.platforms === "direct";
+    vars.platforms = render(platformsPartial, {
+      ...vars,
+      windowsHref: direct ? release.downloadUrl : `${root}download/`,
+      windowsDirect: direct,
+    });
     let content = render(body, vars);
     content = renderShots(content, shots, root, name);
     let html = render(layout, { ...vars, content });

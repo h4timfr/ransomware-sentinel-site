@@ -31,9 +31,11 @@ both served from this public one, anonymously, over HTTPS.
 
 | Path | What it is |
 |---|---|
-| `site.config.json` | **The only place release facts live:** version, date, download URL, SHA-256, size, signed or not, supported Windows. |
+| `site.config.json` | **The only place release facts live:** version, date, download URL, SHA-256, size, signed or not, supported Windows; and the state of other platforms (`platforms.macos`). |
 | `src/pages/` | One HTML fragment per page, with a small JSON header (title, description, path). |
 | `src/partials/layout.html` | Shared head, header, footer and the security policy. |
+| `src/partials/platforms.html` | The Windows and macOS platform cards, shared by the home and download pages. |
+| `vercel.json` | HTTP security headers for the Vercel deployment (headers only). |
 | `src/assets/` | CSS, the one small script, icons, the social preview image and the screenshots. |
 | `scripts/build.mjs` | The build (Node, no dependencies) → `dist/`. |
 | `scripts/check-release.mjs` | Verifies the config against the installer file or the published release. |
@@ -107,12 +109,22 @@ python scripts/optimize-images.py PATH\TO\captured-pngs
 
 ## Hosting and privacy
 
-GitHub Pages serves the site over HTTPS. The site uses no cookies, analytics,
+The site is deployed to Vercel (from `main`, by the Vercel GitHub integration)
+and to GitHub Pages (by the workflow). It uses no cookies, analytics,
 trackers, third-party scripts or fonts. Every page carries a
-Content-Security-Policy that only allows this site's own files. GitHub Pages
-cannot set custom HTTP headers, so the policy is set with a `<meta>` tag
-(which cannot express `frame-ancestors`); moving to a host that supports
-headers (for example Cloudflare Pages) would allow that too.
+Content-Security-Policy `<meta>` tag that only allows this site's own files.
+On Vercel, `vercel.json` also sends the same policy as an HTTP header, plus
+`frame-ancestors 'none'` (which a `<meta>` tag cannot express) and the usual
+hardening headers; a test keeps the two policies identical. GitHub Pages
+cannot set custom headers.
+
+## Platforms
+
+Only Windows is released. `platforms.macos.status` in `site.config.json` is
+`"coming-soon"`, which renders a macOS card with no download. Setting it to
+`"available"` is refused by the build unless the entry also has a `version`,
+a public release `downloadUrl`, `sha256`, `sizeBytes` and `requirements`, so
+the site cannot offer a macOS download that does not exist.
 
 To use a custom domain later, add `"customDomain": "example.org"` to
 `site.config.json` (the build writes `CNAME`), change `siteUrl`, and set the

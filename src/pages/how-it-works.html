@@ -1,0 +1,221 @@
+<!--page
+{
+  "path": "how-it-works/",
+  "nav": "how",
+  "title": "How Ransomware Sentinel works: monitoring, signals, risk score and response",
+  "description": "The complete detection lifecycle of Ransomware Sentinel {{version}}: the folders it watches, the filesystem events it observes, its five behavioural signals and their thresholds, the 0–100 risk score, the four risk bands, what CRITICAL means, how incidents are recorded, and its limitations."
+}
+-->
+<section class="page-head">
+  <div class="wrap">
+    <p class="meta">How it works · version {{version}}</p>
+    <h1>From a file event to an incident</h1>
+    <p class="lede">Eight steps, from the folders you choose to the record of what happened. Every number on this page is the shipped default in version {{version}}.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <ol class="lifecycle">
+      <li class="lc-step" id="folders">
+        <div class="lc-body">
+          <span class="meta">Step 1 · Scope</span>
+          <h2>You choose the folders</h2>
+          <p>First-run setup proposes the folders where your own files live, resolved through the Windows Known Folder API, so a Documents folder redirected to OneDrive or another drive is found where it really is. Nothing outside these folders is watched.</p>
+          <dl class="ledger">
+            <div><dt>Proposed</dt><dd><strong>Desktop, Documents, Downloads, Pictures, Videos, Music.</strong> Untick any of them, or add your own.</dd></div>
+            <div><dt>Off by default</dt><dd><strong>OneDrive.</strong> Its sync client renames files in bursts that look like an attack. Switch it on if you want it watched.</dd></div>
+            <div><dt>Never proposed</dt><dd>Drive roots, the Windows folder and Program Files. Adding one by hand shows a warning first.</dd></div>
+            <div><dt>Honest coverage</dt><dd>Each folder reports Watched, Covered, Missing or No access. Junctions are not followed. A folder deleted and recreated is watched again, and the gap is reported.</dd></div>
+          </dl>
+          <figure class="figure">
+            <div class="frame">
+              <div class="frame-bar" aria-hidden="true"><span>Ransomware Sentinel {{version}} — Protected Locations</span><span>FIG. H1</span></div>
+              <x-shot name="09-protected-locations" alt="The Protected Locations page: the Sentinel sandbox, Desktop, Documents, Downloads, Pictures, Videos and Music are ticked and Watched; OneDrive is listed and Not protected." sizes="(min-width: 1180px) 820px, 100vw"></x-shot>
+            </div>
+            <figcaption><span class="meta">Fig. H1</span><span>Every protected folder and whether it can actually be watched. Demo profile paths.</span></figcaption>
+          </figure>
+        </div>
+      </li>
+
+      <li class="lc-step" id="observe">
+        <div class="lc-body">
+          <span class="meta">Step 2 · Observation</span>
+          <h2>Sentinel observes filesystem activity</h2>
+          <p>Each protected folder gets one recursive Windows file-change watch (<code>ReadDirectoryChangesW</code>). A supervisor checks every second that each watch is alive and re-arms it when it can. Monitoring runs in user mode, only while Sentinel is open.</p>
+          <div class="cols">
+            <div>
+              <h3>Observed</h3>
+              <ul>
+                <li>File and folder creation, modification, deletion and renames, with their paths and times</li>
+                <li>During the initial scan, the names of files already there</li>
+                <li>A list of running processes every few seconds, for context only</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Not observed</h3>
+              <ul>
+                <li>File contents: no file is opened or read</li>
+                <li>Anything outside the protected folders</li>
+                <li>Network traffic, the registry, or which process made a change</li>
+              </ul>
+            </div>
+          </div>
+          <p class="spaced-top">Under a flood of activity, only repeat modifications of a file already seen are shed; renames, creations and deletions never are. Every loss is counted and shown, and the posture becomes DEGRADED.</p>
+        </div>
+      </li>
+
+      <li class="lc-step lc-violet" id="signals">
+        <div class="lc-body">
+          <span class="meta">Step 3 · Signals</span>
+          <h2>Five behavioural signals are evaluated</h2>
+          <p>Every event is counted into a sliding 30-second window. A signal fires while its count in the window is at or over its threshold.</p>
+          <div class="table-wrap">
+            <table class="signals">
+              <thead><tr><th>Signal</th><th>Fires when, within 30 seconds</th><th class="num">Points</th></tr></thead>
+              <tbody>
+                <tr><td>Rapid file modification</td><td>50 file modifications</td><td class="num">+25</td></tr>
+                <tr><td>Mass file rename</td><td>20 renames</td><td class="num">+25</td></tr>
+                <tr><td>Suspicious extension</td><td>One file changed to a listed extension (<code>.locked</code>, <code>.encrypted</code>, <code>.crypted</code>, <code>.enc</code>, <code>.ransom</code>, <code>.lock</code>), or 10 changed to unfamiliar extensions. A change is a rename, or a copy with a new extension followed by deletion of the original.</td><td class="num">+20</td></tr>
+                <tr><td>Mass file creation</td><td>50 new files</td><td class="num">+15</td></tr>
+                <tr><td>High event concentration</td><td>75 file events of any kind</td><td class="num">+15</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>There are no other rules: no malware signatures and no trained models. The thresholds and the window can be changed in Settings within fixed bounds.</p>
+        </div>
+      </li>
+
+      <li class="lc-step lc-violet" id="score">
+        <div class="lc-body">
+          <span class="meta">Step 4 · Score</span>
+          <h2>Signals add up to a 0–100 risk score</h2>
+          <p>The score is the sum of the points of every signal currently over its threshold, recalculated as each event arrives and never more than 100. Because the points are fixed, the score always decomposes into its reasons.</p>
+          <dl class="ledger">
+            <div><dt>Single signal</dt><dd>At most 25, which is <strong>LOW</strong>. One kind of burst alone never reaches MEDIUM, let alone an alert.</dd></div>
+            <div><dt>HIGH (60+)</dt><dd>At least <strong>three signals together</strong>, for example 25 + 20 + 15 = 60.</dd></div>
+            <div><dt>CRITICAL (80+)</dt><dd>At least <strong>four signals together</strong>, for example 25 + 25 + 15 + 15 = 80.</dd></div>
+          </dl>
+          <div class="trace-wrap">
+            <div class="trace-head"><span class="meta">Risk score over one window</span><span class="chip chip-demo">Illustration · Safe Demo</span></div>
+            <div class="trace-scroll" tabindex="0" role="region" aria-label="Risk score chart">
+            <svg class="trace" viewBox="0 0 720 320" role="img" aria-labelledby="trace-title trace-desc">
+              <title id="trace-title">How the Safe Demo's risk score builds up</title>
+              <desc id="trace-desc">File events accumulate. At 75 events the score rises to 15, at 50 modifications to 40, and at the first rename to .locked to 60, which is HIGH and raises an alert.</desc>
+              <defs>
+                <linearGradient id="score-grad" x1="0" y1="0" x2="1" y2="0"><stop class="grad-a" offset="0"/><stop class="grad-b" offset="1"/></linearGradient>
+              </defs>
+              <line class="grid-line" x1="60" y1="230" x2="700" y2="230"/>
+              <line class="threshold t-medium" x1="60" y1="167" x2="700" y2="167"/>
+              <line class="threshold t-high" x1="60" y1="104" x2="700" y2="104"/>
+              <line class="threshold t-critical" x1="60" y1="62" x2="700" y2="62"/>
+              <text class="band-label lbl-medium" x="64" y="161">30 MEDIUM</text>
+              <text class="band-label lbl-high" x="64" y="98">60 HIGH · ALERT</text>
+              <text class="band-label lbl-critical" x="64" y="56">80 CRITICAL</text>
+              <text class="axis-label" x="12" y="234">0</text>
+              <text class="axis-label" x="4" y="24">RISK</text>
+              <path class="score-area" d="M60 230 H200 V198.5 H330 V146 H470 V104 H690 V230 Z"/>
+              <path class="score" stroke="url(#score-grad)" d="M60 230 H200 V198.5 H330 V146 H470 V104 H690"/>
+              <circle class="step-dot" cx="200" cy="198.5" r="5"/>
+              <circle class="step-dot" cx="330" cy="146" r="5"/>
+              <circle class="step-dot" cx="470" cy="104" r="5"/>
+              <text class="step-text" x="210" y="190">+15</text>
+              <text class="step-text" x="340" y="138">+25</text>
+              <text class="step-text" x="480" y="96">+20 → 60</text>
+              <text class="lane-label" x="4" y="275">EVENTS</text>
+              <g class="ticks">
+                <line class="tick-mod" x1="96" y1="262" x2="96" y2="290"/><line class="tick-mod" x1="112" y1="262" x2="112" y2="290"/><line class="tick-mod" x1="126" y1="262" x2="126" y2="290"/><line class="tick-mod" x1="141" y1="262" x2="141" y2="290"/><line class="tick-mod" x1="154" y1="262" x2="154" y2="290"/><line class="tick-mod" x1="166" y1="262" x2="166" y2="290"/><line class="tick-mod" x1="177" y1="262" x2="177" y2="290"/><line class="tick-mod" x1="188" y1="262" x2="188" y2="290"/><line class="tick-mod" x1="197" y1="262" x2="197" y2="290"/><line class="tick-mod" x1="206" y1="262" x2="206" y2="290"/><line class="tick-mod" x1="215" y1="262" x2="215" y2="290"/><line class="tick-mod" x1="224" y1="262" x2="224" y2="290"/><line class="tick-mod" x1="233" y1="262" x2="233" y2="290"/><line class="tick-mod" x1="242" y1="262" x2="242" y2="290"/><line class="tick-mod" x1="251" y1="262" x2="251" y2="290"/><line class="tick-mod" x1="260" y1="262" x2="260" y2="290"/><line class="tick-mod" x1="269" y1="262" x2="269" y2="290"/><line class="tick-mod" x1="278" y1="262" x2="278" y2="290"/><line class="tick-mod" x1="287" y1="262" x2="287" y2="290"/><line class="tick-mod" x1="296" y1="262" x2="296" y2="290"/><line class="tick-mod" x1="305" y1="262" x2="305" y2="290"/><line class="tick-mod" x1="314" y1="262" x2="314" y2="290"/><line class="tick-mod" x1="323" y1="262" x2="323" y2="290"/><line class="tick-mod" x1="332" y1="262" x2="332" y2="290"/><line class="tick-mod" x1="341" y1="262" x2="341" y2="290"/><line class="tick-mod" x1="350" y1="262" x2="350" y2="290"/><line class="tick-mod" x1="359" y1="262" x2="359" y2="290"/><line class="tick-mod" x1="368" y1="262" x2="368" y2="290"/><line class="tick-mod" x1="377" y1="262" x2="377" y2="290"/><line class="tick-mod" x1="386" y1="262" x2="386" y2="290"/><line class="tick-mod" x1="395" y1="262" x2="395" y2="290"/><line class="tick-mod" x1="404" y1="262" x2="404" y2="290"/><line class="tick-mod" x1="413" y1="262" x2="413" y2="290"/><line class="tick-mod" x1="422" y1="262" x2="422" y2="290"/><line class="tick-mod" x1="431" y1="262" x2="431" y2="290"/><line class="tick-mod" x1="440" y1="262" x2="440" y2="290"/><line class="tick-mod" x1="449" y1="262" x2="449" y2="290"/><line class="tick-mod" x1="458" y1="262" x2="458" y2="290"/>
+                <line class="tick-ren" x1="470" y1="262" x2="470" y2="290"/><line class="tick-ren" x1="486" y1="262" x2="486" y2="290"/><line class="tick-ren" x1="503" y1="262" x2="503" y2="290"/><line class="tick-ren" x1="521" y1="262" x2="521" y2="290"/><line class="tick-ren" x1="540" y1="262" x2="540" y2="290"/>
+              </g>
+              <text class="axis-label" x="700" y="312" text-anchor="end">30-SECOND WINDOW →</text>
+            </svg>
+            </div>
+            <div class="trace-legend" aria-hidden="true"><span><i class="key-mod"></i>modified</span><span><i class="key-ren"></i>renamed to .locked</span><span><i class="key-score"></i>risk score</span></div>
+          </div>
+          <p class="small muted spaced-top">Fig. H2 — illustration, not live data: the progression the Safe Demo records on 30 synthetic files. 75 events (+15), 50 modifications (+25), then a rename to <code>.locked</code> (+20). The total, 60, is HIGH.</p>
+        </div>
+      </li>
+
+      <li class="lc-step lc-violet" id="bands">
+        <div class="lc-body">
+          <span class="meta">Step 5 · Classification</span>
+          <h2>The score maps to a risk band</h2>
+          <p>Every event is recorded with the risk at that moment and the signals that fired. The HIGH and CRITICAL thresholds can be changed in Settings within fixed bounds.</p>
+          <div class="bandtable" role="list" aria-label="Risk bands">
+            <div class="band-low" role="listitem"><b>LOW</b><span class="range">1–29</span><p>Recorded with the event. Nothing is raised.</p></div>
+            <div class="band-medium" role="listitem"><b>MEDIUM</b><span class="range">30–59</span><p>The event is marked <em>Review</em> on the Activity page.</p></div>
+            <div class="band-high" role="listitem"><b>HIGH</b><span class="range">60–79</span><p>The event is <em>Flagged</em>, an alert is raised, and related alerts are grouped into one incident.</p></div>
+            <div class="band-critical" role="listitem"><b>CRITICAL</b><span class="range">80–100</span><p>A critical alert. A climb from HIGH is reported at once, never held back.</p></div>
+          </div>
+          <figure class="figure">
+            <div class="frame">
+              <div class="frame-bar" aria-hidden="true"><span>Activity</span><span>FIG. H3</span></div>
+              <x-shot name="13-activity" alt="The Activity page listing filesystem events newest first: files renamed to .locked marked High (60) and Flagged, earlier modifications marked Medium (40) and Review, each with the rules that fired and the file path in the demo workspace." sizes="(min-width: 1180px) 820px, 100vw"></x-shot>
+            </div>
+            <figcaption><span class="meta">Fig. H3</span><span><span class="chip chip-demo">Safe Demo</span>Raw events, each with the risk at that moment and the rules that fired: modifications at MEDIUM (40, Review), renames to <code>.locked</code> at HIGH (60, Flagged).</span></figcaption>
+          </figure>
+        </div>
+      </li>
+
+      <li class="lc-step lc-violet" id="alert">
+        <div class="lc-body">
+          <span class="meta">Step 6 · Alert</span>
+          <h2>HIGH raises an alert and opens an incident</h2>
+          <p>An alert carries the score, the signals and the files involved. Alerts from one episode are grouped into one incident, and a 30-second cooldown stops a single burst from raising dozens of alerts. While a HIGH incident is open, the posture stays PROTECTED and says that an incident needs attention. Alerts appear in Sentinel's window; nothing is sent anywhere.</p>
+        </div>
+      </li>
+
+      <li class="lc-step lc-critical" id="respond">
+        <div class="lc-body">
+          <span class="meta">Step 7 · Response</span>
+          <h2>CRITICAL changes the posture. You choose the response.</h2>
+          <p>At CRITICAL, the security posture becomes <strong>CRITICAL THREAT</strong> and stays so while the critical incident is open. That is the only thing CRITICAL changes automatically: at no level does Sentinel block a program, stop a file change, quarantine or delete anything by itself.</p>
+          <dl class="ledger">
+            <div><dt>Triage</dt><dd><strong>Acknowledge, investigate, resolve or dismiss.</strong> Each action is confirmed and written to the incident's audit trail.</dd></div>
+            <div><dt>Contain</dt><dd><strong>Quarantine</strong> a program file the incident names, if it names one. Containment, not isolation: Sentinel does not stop the program. <a href="{{root}}docs/#quarantine">Quarantine and restore</a></dd></div>
+            <div><dt>Recover</dt><dd>Sentinel cannot decrypt files. <strong>Recovery readiness</strong> checks that a recent, independent copy appears to exist in your backup folders.</dd></div>
+          </dl>
+          <div class="note note-warn">
+            <p><strong>When an alert appears:</strong> don't delete anything yet. Read <em>Why this is suspicious</em>. If it wasn't you changing many files, disconnect from the network, run a full scan with Microsoft Defender or your antivirus, and check your backups. Then record the outcome in the incident.</p>
+          </div>
+        </div>
+      </li>
+
+      <li class="lc-step lc-violet" id="record">
+        <div class="lc-body">
+          <span class="meta">Step 8 · Record</span>
+          <h2>The incident is recorded, tamper-evidently</h2>
+          <p>An incident shows the rules and points behind the score, what happened to each file (following renames as one file), the first and last activity, a candidate program if one could be inferred, and a timeline of every action taken.</p>
+          <dl class="ledger">
+            <div><dt>Attribution</dt><dd>Windows file events do not say which program made a change. Sentinel reports <strong>UNKNOWN</strong> rather than guessing; a program it does name is a lead, not proof.</dd></div>
+            <div><dt>Audit chain</dt><dd>Incidents, trust decisions, quarantine actions and configuration are committed to an append-only <strong>HMAC-SHA256 chain</strong>, verified at start-up and on demand. Edited, removed or rolled-back records are reported. <a href="{{root}}docs/#integrity">Integrity model</a></dd></div>
+            <div><dt>Where</dt><dd>On your PC, in <code>%LOCALAPPDATA%\RansomwareSentinel</code>. Exports are files you choose to save; they contain paths, never file contents or keys.</dd></div>
+          </dl>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section section-alt" aria-labelledby="limitations">
+  <div class="wrap split">
+    <div class="sticky-head">
+      <p class="index">Limitations</p>
+      <h2 id="limitations">What Sentinel cannot do</h2>
+      <p class="muted">Behavioural detection is one layer. These limits are why it belongs alongside Microsoft Defender and tested backups.</p>
+    </div>
+    <ul class="bounds-list prose">
+      <li><strong>Not antivirus</strong>, and not a replacement for Microsoft Defender or an endpoint detection and response (EDR) product.</li>
+      <li><strong>User mode only:</strong> no kernel driver, ETW consumer or file-system minifilter. Only protected folders are watched, and only while Sentinel is open.</li>
+      <li><strong>Heuristic and rate-based.</strong> Files encrypted in place without renaming, or slowly enough that no 30-second window looks unusual, stay below an alert (in-place encryption reaches at most MEDIUM). Novel behaviour may match no signal.</li>
+      <li><strong>Attribution is usually UNKNOWN;</strong> a named program is a candidate, not proven cause.</li>
+      <li><strong>No blocking, process termination or write prevention.</strong> Sentinel detects and records; you act.</li>
+      <li><strong>No decryption or recovery</strong> of encrypted files. Recovery readiness only checks that a backup appears to exist.</li>
+      <li><strong>Quarantine is containment, not isolation.</strong></li>
+      <li><strong>Ordinary bursts can raise alerts:</strong> OneDrive sync, extracting archives, bulk photo imports.</li>
+      <li><strong>Under a flood</strong> beyond what it can analyse, Sentinel sheds routine events and reports it; the window can pause for a few seconds at the peak.</li>
+      <li><strong>After a crash</strong> or if it is ended, nothing is watched until Sentinel is opened again. It does not start with Windows on its own.</li>
+      <li><strong>Windows only.</strong> There is no macOS or Linux version in the current release.</li>
+    </ul>
+  </div>
+</section>

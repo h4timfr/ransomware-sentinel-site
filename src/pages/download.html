@@ -2,34 +2,33 @@
 {
   "path": "download/",
   "nav": "download",
+  "platforms": "direct",
   "title": "Download Ransomware Sentinel {{version}} for Windows",
-  "description": "Download the Ransomware Sentinel {{version}} installer for Windows 10 (1809 or later) and Windows 11, 64-bit. Includes the SHA-256 checksum, how to verify it, and what to expect from Windows SmartScreen."
+  "description": "Download the Ransomware Sentinel {{version}} installer for Windows 10 (1809 or later) and Windows 11, 64-bit, with its SHA-256 checksum, how to verify it, and what to expect from Windows SmartScreen. A macOS version is not available yet."
 }
 -->
 <section class="page-head">
   <div class="wrap">
-    <p class="meta">Download · Windows</p>
+    <p class="meta">Download · version {{version}} · {{releaseDate}}</p>
     <h1>Download Ransomware Sentinel</h1>
-    <p class="lede">One installer. No Python, no command line, no account. After installing, a short setup helps you choose the folders to watch.</p>
+    <p class="lede">One Windows installer. No Python, no command line, no account. After installing, a short setup helps you choose the folders to watch.</p>
+    <h2 class="visually-hidden">Platforms</h2>
+    {{{platforms}}}
   </div>
 </section>
 
-<section class="section" aria-labelledby="get">
-  <div class="wrap dl">
-    <div class="dl-primary">
-      <p class="index">Current release</p>
-      <h2 id="get">Version {{version}}</h2>
-      <p class="muted">Released {{releaseDate}} · <a href="{{releaseNotesUrl}}" rel="noopener">Release notes</a></p>
+<section class="section" aria-labelledby="facts">
+  <div class="wrap split">
+    <div>
+      <p class="index index-violet">Verify</p>
+      <h2 id="facts">Check what you downloaded</h2>
+      <p class="muted">A SHA-256 checksum is a fingerprint of the file: change one byte and it is completely different. If yours matches this one, you have the published file.</p>
+    </div>
+    <div>
       {{#if sha256}}
-      <a class="btn btn-primary btn-large" href="{{downloadUrl}}">
-        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 5.2 10.4 4v7.2H3zm8.4-1.3L21 2.5v8.7h-9.6zM3 12.6h7.4v7.3L3 18.8zm8.4 0H21v8.9l-9.6-1.4z"/></svg>
-        Download for Windows
-      </a>
-      <p class="dl-file">{{installerFile}} · {{size}} · {{architecture}}</p>
-
       <div class="checksum">
         <div class="checksum-head">
-          <h3 id="checksum" class="meta">SHA-256</h3>
+          <h3 id="checksum" class="meta">SHA-256 · {{installerFile}}</h3>
           <button class="btn btn-secondary btn-small copy-btn" type="button" data-copy="sha256" data-status="copy-status" hidden>Copy</button>
         </div>
         <code id="sha256">{{sha256}}</code>
@@ -38,44 +37,25 @@
       {{else}}
       <div class="note note-warn"><p><strong>The installer for version {{version}} is not published yet.</strong> This page will offer it as soon as it is.</p></div>
       {{/if}}
+      <p class="small muted">Also published as <a href="{{checksumUrl}}" rel="noopener">{{installerFile}}.sha256</a> beside the installer in the <a href="{{releaseNotesUrl}}" rel="noopener">{{tag}} release</a>.</p>
+      <h3 id="verify">In Windows PowerShell</h3>
+      <pre><code>cd "$HOME\Downloads"
+Get-FileHash .\{{installerFile}} -Algorithm SHA256</code></pre>
+      <p class="small muted">The <em>Hash</em> it prints must match the value above; capitalisation does not matter. In Command Prompt, from the same folder: <code>certutil -hashfile {{installerFile}} SHA256</code>.</p>
     </div>
-
-    <dl class="ledger" aria-label="Installer details">
-      <div><dt>Works on</dt><dd>{{windows}}. Tested on {{testedOn}}. Not available for macOS or Linux.</dd></div>
-      <div><dt>File</dt><dd><code>{{installerFile}}</code>{{#if size}} · {{size}}{{/if}}</dd></div>
-      <div><dt>Source</dt><dd>Published as an asset of the <a href="{{releaseNotesUrl}}" rel="noopener">{{tag}} GitHub release</a>, with its checksum file <a href="{{checksumUrl}}" rel="noopener">{{installerFile}}.sha256</a>.</dd></div>
-      <div><dt>Installs</dt><dd>A standard Windows installer: Start menu entry, optional desktop shortcut, and an uninstaller. For all users (asks for permission) or just for you (no administrator rights).</dd></div>
-      <div><dt>Code signing</dt><dd>{{#if signed}}Signed{{else}}Not code-signed yet. <a href="#smartscreen">What this means</a>.{{/if}}</dd></div>
-      <div><dt>Network</dt><dd>None. The application makes no network connections and does not update itself.</dd></div>
-    </dl>
   </div>
 </section>
 
-<section class="section" aria-labelledby="smartscreen">
+<section class="section section-alt" aria-labelledby="smartscreen">
   <div class="wrap split">
     <div>
       <p class="index">Before you run it</p>
       <h2 id="smartscreen">Windows may show a SmartScreen warning</h2>
     </div>
     <div class="prose">
-      <p>Because the current installer is not digitally signed, Microsoft Defender SmartScreen may show an "unrecognized app" warning ("Windows protected your PC", publisher <em>Unknown publisher</em>). SmartScreen shows this for software whose publisher identity and download reputation it cannot yet establish. It is not a malware verdict, and it is worth taking seriously.</p>
-      <p>Before you continue, check two things: you downloaded <code>{{installerFile}}</code> from this page yourself, and its SHA-256 matches the one published here. If both are true, <em>More info → Run anyway</em> continues. If you are unsure, don't run it.</p>
+      <p>The installer is not code-signed yet, so Microsoft Defender SmartScreen may show an "unrecognized app" warning ("Windows protected your PC", publisher <em>Unknown publisher</em>). SmartScreen shows this for software whose publisher it cannot identify and whose download reputation it cannot yet establish. It is not a malware verdict, and it is worth taking seriously.</p>
+      <p>Before you continue, check two things: you downloaded <code>{{installerFile}}</code> from this page yourself, and its SHA-256 matches the one above. If both are true, <em>More info → Run anyway</em> continues. If you are unsure, don't run it.</p>
       <div class="note note-warn"><p>Never turn off Microsoft Defender, SmartScreen or your antivirus to install Ransomware Sentinel, or anything else. Nothing on this site asks you to.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section" aria-labelledby="verify">
-  <div class="wrap split">
-    <div>
-      <p class="index">Verify</p>
-      <h2 id="verify">Check the file's SHA-256</h2>
-    </div>
-    <div class="prose">
-      <p>A SHA-256 checksum is a fingerprint of the file: change one byte and it is completely different. In <strong>Windows PowerShell</strong>, run:</p>
-      <pre><code>cd "$HOME\Downloads"
-Get-FileHash .\{{installerFile}} -Algorithm SHA256</code></pre>
-      <p>The <em>Hash</em> it prints must match {{#if sha256}}the checksum <a href="#checksum">above</a>{{else}}the checksum published with the release{{/if}}; capitalisation does not matter. From the same folder in Command Prompt, <code>certutil -hashfile {{installerFile}} SHA256</code> gives the same value.</p>
     </div>
   </div>
 </section>
@@ -88,23 +68,23 @@ Get-FileHash .\{{installerFile}} -Algorithm SHA256</code></pre>
     </div>
     <ol class="steps">
       <li><div><h3>Run the installer</h3><p>Open <code>{{installerFile}}</code> from your browser's downloads. If SmartScreen warns, see <a href="#smartscreen">above</a>.</p></div></li>
-      <li><div><h3>Choose who it is for</h3><p><strong>All users</strong> (Windows asks for permission) or <strong>just you</strong> (no administrator rights). Read the short "Before you install" page.</p></div></li>
+      <li><div><h3>Choose who it is for</h3><p><strong>All users</strong> (Windows asks for administrator permission) or <strong>just you</strong> (no administrator rights needed).</p></div></li>
       <li><div><h3>Install and open</h3><p>Keep the suggested folder, choose whether you want a desktop shortcut, and leave <strong>Open Ransomware Sentinel now</strong> ticked.</p></div></li>
       <li><div><h3>Choose your folders</h3><p>The first-run setup proposes your folders, runs a quick scan and starts protection. The <a href="{{root}}docs/#first-run">documentation</a> covers every screen.</p></div></li>
     </ol>
   </div>
 </section>
 
-<section class="section" aria-labelledby="after">
+<section class="section section-alt" aria-labelledby="after">
   <div class="wrap split">
     <div>
       <p class="index">Afterwards</p>
       <h2 id="after">Updating and uninstalling</h2>
     </div>
-    <div class="prose">
-      <p><strong>Updating.</strong> Run a newer installer from this page. It replaces the program and keeps your settings and records.</p>
-      <p><strong>Uninstalling.</strong> Settings → Apps → Installed apps → Ransomware Sentinel → Uninstall. Your records in <code>%LOCALAPPDATA%\RansomwareSentinel</code> are kept on purpose; delete that folder yourself if you no longer need them.</p>
-      <p><strong>Source.</strong> The application's source code is not public. This website, the release notes and the installer releases are public in the <a href="{{publicRepoUrl}}" rel="noopener">GitHub repository</a>.</p>
-    </div>
+    <dl class="ledger">
+      <div><dt>Updates</dt><dd>Sentinel makes no network connections, so it never checks for updates. Run a newer installer from this page; it replaces the program and keeps your settings and records.</dd></div>
+      <div><dt>Uninstall</dt><dd>Settings → Apps → Installed apps → Ransomware Sentinel → Uninstall. Your records in <code>%LOCALAPPDATA%\RansomwareSentinel</code> are kept on purpose; delete that folder yourself if you no longer need them.</dd></div>
+      <div><dt>Source</dt><dd>The application's source code is not public. This website and the installer releases are public in the <a href="{{publicRepoUrl}}" rel="noopener">GitHub repository</a>.</dd></div>
+    </dl>
   </div>
 </section>

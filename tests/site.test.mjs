@@ -12,7 +12,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, posix, relative } from "node:path";
 import { after, before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { build, loadConfig } from "../scripts/build.mjs";
+import { build, loadConfig, platformVars } from "../scripts/build.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const config = loadConfig();
@@ -36,6 +36,12 @@ function tags(content, name) {
   return [...content.matchAll(new RegExp(`<${name}\\b[^>]*>`, "gi"))].map((m) => m[0]);
 }
 
+// Page text for claim checks. The homepage's "It does not claim" list names
+// claims in order to deny them, so it is left out here and checked on its own.
+function affirmativeText(content) {
+  return content.replace(/<div class="doesnt">[\s\S]*?<\/div>/g, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+}
+
 function decode(value) {
   return value.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 }
@@ -52,7 +58,7 @@ after(() => rmSync(out, { recursive: true, force: true }));
 describe("build", () => {
   test("produces every page, the download redirect, sitemap and robots.txt", () => {
     for (const page of ["index.html", "download/index.html", "docs/index.html", "faq/index.html",
-      "privacy/index.html", "404.html", "download/windows/index.html", "sitemap.xml", "robots.txt", ".nojekyll"]) {
+      "privacy/index.html", "how-it-works/index.html", "404.html", "download/windows/index.html", "sitemap.xml", "robots.txt", ".nojekyll"]) {
       assert.ok(existsSync(join(out, page)), `${page} missing`);
     }
   });
@@ -107,7 +113,10 @@ describe("links and assets", () => {
         if (!/^https?:/.test(href)) continue;
         assert.ok(href.startsWith("https://"), `${page}: insecure link ${href}`);
         const host = new URL(href).host;
-        assert.ok(["github.com", "docs.github.com"].includes(host), `${page}: unexpected external host ${host}`);
+        // GitHub hosts the releases and the repository; the privacy page links
+        // the two hosts' privacy statements (GitHub and Vercel).
+        assert.ok(["github.com", "docs.github.com", "vercel.com"].includes(host), `${page}: unexpected external host ${host}`);
+        if (host === "vercel.com") assert.equal(page, "privacy/index.html", `${page}: links to vercel.com`);
         if (href !== release.downloadUrl) {
           assert.match(attrs(tag).rel || "", /noopener/, `${page}: ${href} lacks rel=noopener`);
         }
@@ -127,7 +136,7 @@ describe("links and assets", () => {
 
   test("the sitemap and robots.txt use the configured site URL", () => {
     const sitemap = readFileSync(join(out, "sitemap.xml"), "utf8");
-    for (const path of ["", "download/", "docs/", "faq/", "privacy/"]) {
+    for (const path of ["", "how-it-works/", "download/", "docs/", "faq/", "privacy/"]) {
       assert.ok(sitemap.includes(`<loc>${config.siteUrl}/${path}</loc>`), `sitemap lacks /${path}`);
     }
     assert.ok(!sitemap.includes("404"), "the 404 page is in the sitemap");
@@ -136,7 +145,7 @@ describe("links and assets", () => {
 });
 
 describe("accessibility basics", () => {
-  for (const page of ["index.html", "download/index.html", "docs/index.html", "faq/index.html", "privacy/index.html", "404.html"]) {
+  for (const page of ["index.html", "how-it-works/index.html", "download/index.html", "docs/index.html", "faq/index.html", "privacy/index.html", "404.html"]) {
     test(`${page}: language, title, one h1, skip link, labelled images`, () => {
       const content = html.get(page);
       assert.match(content, /<html lang="en">/);
@@ -264,7 +273,7 @@ describe("content", () => {
       // Affirmative only: "is not a replacement for Microsoft Defender" is the point.
       /(?<!(?:not|n't)\s(?:a\s)?)\b(?:replaces|replacement for)\s(?:windows|microsoft)\sdefender/i];
     for (const [page, content] of html) {
-      const text = content.replace(/<[^>]+>/g, " ");
+      const text = affirmativeText(content);
       for (const pattern of banned) {
         const match = text.match(pattern);
         assert.ok(!match, `${page}: "${match && match[0]}"`);
@@ -273,13 +282,23 @@ describe("content", () => {
   });
 
   test("states the key limitations where people decide to install", () => {
-    const home = html.get("index.html").replace(/<[^>]+>/g, " ");
+    const homeHtml = html.get("index.html");
+    const doesnt = homeHtml.match(/<div class="doesnt">([\s\S]*?)<\/div>/);
+    assert.ok(doesnt, "homepage has no list of what Sentinel does not claim");
+    const denied = doesnt[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    assert.match(denied, /^\s*It does not claim\b/, "the denial list must be headed as such");
+    for (const claim of [/detect every ransomware family/i, /replace antivirus or EDR/i, /Kernel-level protection/i,
+      /Cloud threat intelligence/i, /decrypt or recover files/i, /macOS or Linux support/i]) {
+      assert.match(denied, claim, `the homepage does not deny ${claim}`);
+    }
     const download = html.get("download/index.html").replace(/<[^>]+>/g, " ");
-    assert.match(home, /Replace Microsoft Defender or antivirus/);
-    assert.match(home, /Decrypt or recover files/);
-    assert.match(home, /Guarantee that every ransomware attack is detected/);
     assert.match(download, /not code-signed/i);
     assert.match(download, /Never turn off Microsoft Defender, SmartScreen or your antivirus/);
+    const limits = html.get("how-it-works/index.html").replace(/<[^>]+>/g, " ");
+    for (const limit of [/not a replacement for Microsoft Defender/, /No decryption or recovery/, /no kernel driver/,
+      /Quarantine is containment, not isolation/, /No blocking, process termination or write prevention/]) {
+      assert.match(limits, limit, `How it works does not state ${limit}`);
+    }
   });
 
   test("screenshots from the Safe Demo are labelled as such", () => {
@@ -319,10 +338,44 @@ describe("content", () => {
     for (const [page] of html) {
       if (page.startsWith("download/windows")) continue;
       // macOS and Linux may only be mentioned to say there is no version for them.
-      for (const m of text(page).matchAll(/[^.?!]*\b(macOS|Mac OS|OS X|Linux)\b[^.?!]*[.?!]?/gi)) {
-        assert.match(m[0], /not available|no macOS or Linux version|macOS or Linux\?/i, `${page}: "${m[0].trim()}"`);
+      const content = html.get(page).replace(/<div class="doesnt">[\s\S]*?<\/div>/g, " ");
+      const plain = content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+      for (const m of plain.matchAll(/[^.?!]*\b(macOS|Mac OS|OS X|Linux)\b[^.?!]*[.?!]?/gi)) {
+        assert.match(m[0], /not available|no macOS (?:or Linux )?(?:version|download)|no Linux version|coming soon|Is there a macOS version\?|macOS or Linux\?/i,
+          `${page}: "${m[0].trim()}"`);
+        assert.doesNotMatch(m[0], /\b(?:supports?|runs on|works on|download(?:s)? for) (?:macOS|Mac|Linux)\b|\b(?:macOS|Linux) (?:version|release|support) is available\b/i,
+          `${page}: "${m[0].trim()}"`);
       }
     }
+  });
+
+  test("macOS is shown as coming soon, with no download of any kind", () => {
+    assert.equal(config.platforms?.macos?.status ?? "coming-soon", "coming-soon",
+      "macOS may only be offered once a real macOS release exists (see platformVars)");
+    for (const page of ["index.html", "download/index.html"]) {
+      const content = html.get(page);
+      const card = content.match(/<article class="[^"]*" data-platform="macos" data-status="([^"]+)"[\s\S]*?<\/article>/);
+      assert.ok(card, `${page} has no macOS card`);
+      assert.equal(card[1], "coming-soon");
+      assert.match(card[0], /Coming soon/);
+      assert.match(card[0], /not available in the current release/);
+      assert.deepEqual(tags(card[0], "a"), [], `${page}: the macOS card must not link anywhere`);
+      assert.doesNotMatch(card[0], /<button\b/, `${page}: the macOS card must not offer an action`);
+    }
+    for (const [page, content] of html) {
+      for (const tag of tags(content, "a")) {
+        const href = decode(attrs(tag).href || "");
+        assert.ok(!/\.(dmg|pkg|app|zip|tar\.gz)(?:[#?]|$)/i.test(href), `${page}: links to a non-Windows package ${href}`);
+        assert.ok(!/mac(os)?/i.test(href), `${page}: links to a macOS address ${href}`);
+      }
+    }
+  });
+
+  test("an available macOS platform requires real, public release facts", () => {
+    const base = { ...config, platforms: { macos: { status: "available" } } };
+    assert.throws(() => platformVars(base), /lacks version, downloadUrl, sha256, sizeBytes, requirements/);
+    assert.throws(() => platformVars({ ...config, platforms: { macos: { status: "beta" } } }), /must be "available" or "coming-soon"/);
+    assert.deepEqual(platformVars(config), { macosAvailable: false });
   });
 
   test("never claims kernel-level monitoring, EDR, automatic prevention, decryption or isolation", () => {
@@ -338,7 +391,7 @@ describe("content", () => {
       /\b(?:identifies|names) the (?:exact |responsible )?(?:program|process) (?:every time|always|with certainty)/i,
     ];
     for (const [page, content] of html) {
-      const text = content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+      const text = affirmativeText(content);
       for (const pattern of banned) {
         const match = text.match(pattern);
         assert.ok(!match, `${page}: "${match && text.slice(Math.max(0, match.index - 40), match.index + 60)}"`);
@@ -435,14 +488,22 @@ describe("release facts", () => {
   });
 
   test("the homepage and download page show the current version, size, checksum and signing state", () => {
+    // The size is shown as Windows shows it (binary megabytes, labelled MB)
+    // and, on the download page, as the exact byte count.
     const mb = `${(release.sizeBytes / 1024 / 1024).toFixed(1)} MB`;
+    assert.equal(mb, "32.9 MB");
+    const exact = `${release.sizeBytes.toLocaleString("en-US")} bytes`;
     const home = html.get("index.html");
     const download = html.get("download/index.html");
-    assert.ok(home.includes(`Ransomware Sentinel ${release.version}`), "homepage release band lacks the version");
-    assert.ok(home.includes(release.sha256), "homepage lacks the checksum");
-    assert.ok(home.includes(`${mb} · unsigned`) || release.signed, "homepage does not say the installer is unsigned");
-    assert.ok(download.includes(mb), `download page lacks the size ${mb}`);
-    assert.ok(download.includes(`Version ${release.version}`));
+    for (const [name, page] of [["homepage", home], ["download page", download]]) {
+      assert.ok(page.includes(`Ransomware Sentinel ${release.version}`), `${name} lacks the version`);
+      assert.ok(page.includes(mb), `${name} lacks the size ${mb}`);
+      assert.ok(release.signed || page.includes("Not code-signed yet"), `${name} does not say the installer is unsigned`);
+    }
+    // The checksum lives on the download page; the homepage leads there.
+    assert.ok(download.includes(`<code id="sha256">${release.sha256}</code>`), "download page lacks the full checksum");
+    assert.ok(download.includes(exact), `download page lacks the exact size ${exact}`);
+    assert.ok(tags(home, "a").some((t) => attrs(t).href === "./download/"), "homepage does not lead to the download page");
     // The installer is linked directly only beside its checksum; other pages
     // send visitors to the download page. Any direct link names this tag.
     const assetLinks = (page) => tags(page, "a").map((t) => decode(attrs(t).href || "")).filter((h) => h.includes("/releases/download/"));
@@ -450,5 +511,97 @@ describe("release facts", () => {
     for (const [page, content] of html) {
       for (const href of assetLinks(content)) assert.ok(href.includes(`/download/${release.tag}/`), `${page}: ${href} is not the ${release.tag} asset`);
     }
+  });
+
+  test("no stale checksum, installer size or release URL survives anywhere", () => {
+    // Any SHA-256 the site or repository shows is the current one; any byte
+    // count is the current installer's; any release URL names the current tag.
+    const files = [...walk(join(ROOT, "src")), ...walk(join(ROOT, "scripts")), ...walk(join(ROOT, "release-notes")),
+      join(ROOT, "README.md"), join(ROOT, "site.config.json"), ...walk(out)]
+      .filter((f) => /\.(html|css|js|mjs|json|txt|xml|md)$/.test(f));
+    const exact = release.sizeBytes.toLocaleString("en-US");
+    for (const f of files) {
+      const text = readFileSync(f, "utf8");
+      for (const m of text.matchAll(/\b[0-9a-f]{64}\b/gi)) assert.equal(m[0].toLowerCase(), release.sha256, `${relative(ROOT, f)}: stale hash ${m[0]}`);
+      for (const m of text.matchAll(/\b\d{2},\d{3},\d{3}(?= bytes)/g)) assert.equal(m[0], exact, `${relative(ROOT, f)}: stale size ${m[0]} bytes`);
+      for (const m of text.matchAll(/\/releases\/(?:download|tag)\/(v\d+\.\d+\.\d+)/g)) assert.equal(m[1], release.tag, `${relative(ROOT, f)}: stale release URL ${m[0]}`);
+    }
+    assert.deepEqual(readdirSync(join(ROOT, "release-notes")), [`${release.tag}.md`], "release notes exist for an unpublished release");
+  });
+});
+
+describe("hosting", () => {
+  test("Vercel serves the same content security policy as the pages, plus frame-ancestors", () => {
+    const vercel = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8"));
+    const headers = Object.fromEntries(vercel.headers.find((h) => h.source === "/(.*)").headers.map((h) => [h.key, h.value]));
+    const meta = html.get("index.html").match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+    const asSet = (csp) => new Set(csp.split(";").map((d) => d.trim()).filter(Boolean));
+    const header = asSet(headers["Content-Security-Policy"]);
+    for (const directive of asSet(meta)) assert.ok(header.has(directive), `vercel.json CSP lacks "${directive}"`);
+    assert.ok(header.has("frame-ancestors 'none'"));
+    assert.equal(header.size, asSet(meta).size + 1, "vercel.json CSP must not loosen or add anything else");
+    assert.equal(headers["X-Content-Type-Options"], "nosniff");
+    assert.ok(headers["Referrer-Policy"]);
+    // Headers only: build and routing stay in the Vercel project settings.
+    assert.deepEqual(Object.keys(vercel).sort(), ["$schema", "headers"]);
+  });
+});
+
+describe("no redundancy", () => {
+  test("each screenshot appears once on the whole site", () => {
+    const counts = {};
+    for (const content of html.values()) {
+      for (const m of content.matchAll(/<img src="[^"]*shots\/([\w-]+?)-\d+\.webp"/g)) counts[m[1]] = (counts[m[1]] || 0) + 1;
+    }
+    for (const [name, n] of Object.entries(counts)) assert.equal(n, 1, `${name} is shown ${n} times`);
+  });
+
+  test("no sentence of page copy is repeated on another page", () => {
+    // Shared chrome (head, header, footer) and the shared platform cards are
+    // components, not copy; everything else has one home and is linked to.
+    const owner = new Map();
+    const problems = [];
+    for (const [page, content] of html) {
+      if (page.startsWith("download/windows")) continue;
+      const text = content.replace(/<head>[\s\S]*?<\/head>/, "").replace(/<header[\s\S]*?<\/header>/, "")
+        .replace(/<footer[\s\S]*?<\/footer>/, "").replace(/<div class="platforms">[\s\S]*?<\/div>\s*<\/article>\s*(?:<\/div>)?/g, " ")
+        .replace(/<article class="platform[\s\S]*?<\/article>/g, " ")
+        // A block boundary ends a sentence even without punctuation (headings).
+        .replace(/<\/(?:p|h[1-6]|li|dt|dd|td|th|summary|figcaption|div|section)>/g, "\n")
+        .replace(/<[^>]+>/g, " ").replace(/&[a-z]+;/g, " ").replace(/[^\S\n]+/g, " ");
+      for (const sentence of text.split(/(?<=[.?!])\s+|\n/).map((s) => s.trim()).filter((s) => s.length >= 50)) {
+        if (owner.has(sentence) && owner.get(sentence) !== page) problems.push(`${owner.get(sentence)} and ${page}: "${sentence.slice(0, 90)}"`);
+        else owner.set(sentence, page);
+      }
+    }
+    assert.deepEqual(problems, []);
+  });
+
+  test("the full checksum is shown only on the download page", () => {
+    for (const [page, content] of html) {
+      if (page === "download/index.html" || page.startsWith("download/windows")) continue;
+      assert.ok(!content.includes(release.sha256), `${page} repeats the checksum; link to the download page instead`);
+    }
+  });
+
+  test("the signal points published on How it works add up to 100", () => {
+    const page = html.get("how-it-works/index.html");
+    const points = [...page.matchAll(/<td class="num">\+(\d+)<\/td>/g)].map((m) => Number(m[1]));
+    assert.deepEqual(points, [25, 25, 20, 15, 15]);
+  });
+
+  test("the stated signal combinations follow from the points and the band thresholds", () => {
+    const points = [25, 25, 20, 15, 15].sort((a, b) => b - a);
+    const fewest = (threshold) => { let sum = 0; for (let n = 1; n <= points.length; n++) { sum += points[n - 1]; if (sum >= threshold) return n; } return Infinity; };
+    const words = { 1: "one", 2: "two", 3: "three", 4: "four", 5: "five" };
+    const band = (score) => (score >= 80 ? "CRITICAL" : score >= 60 ? "HIGH" : score >= 30 ? "MEDIUM" : "LOW");
+    const how = html.get("how-it-works/index.html").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    assert.match(how, new RegExp(`At most ${points[0]}, which is ${band(points[0])}\\b`), "single-signal band is wrong");
+    assert.match(how, new RegExp(`At least ${words[fewest(60)]} signals together`), "HIGH combination is wrong");
+    assert.match(how, new RegExp(`At least ${words[fewest(80)]} signals together`), "CRITICAL combination is wrong");
+    const home = html.get("index.html").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    assert.match(home, new RegExp(`HIGH needs at least ${words[fewest(60)]} signals together and CRITICAL at least ${words[fewest(80)]}`));
+    const faq = html.get("faq/index.html").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    assert.match(faq, new RegExp(`takes at least ${words[fewest(80)]} signals at once`));
   });
 });

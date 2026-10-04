@@ -16,5 +16,10 @@
     "architecture": "64-bit (x64)",
     "windows": "Windows 10 (version 1809 or later) or Windows 11, 64-bit",
     "testedOn": "Windows 11"
+  },
+  "platforms": {
+    "macos": {
+      "status": "coming-soon"
+    }
   }
 }
