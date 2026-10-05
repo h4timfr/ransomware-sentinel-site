@@ -1,6 +1,7 @@
 {
   "siteName": "Ransomware Sentinel",
-  "siteUrl": "https://h4timfr.github.io/ransomware-sentinel-site",
+  "siteUrl": "https://ransomware-sentinel-site.vercel.app",
+  "mirrorUrl": "https://h4timfr.github.io/ransomware-sentinel-site",
   "publicRepoUrl": "https://github.com/h4timfr/ransomware-sentinel-site",
   "release": {
     "version": "1.3.2",

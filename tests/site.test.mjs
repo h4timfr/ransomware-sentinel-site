@@ -12,14 +12,19 @@ import { tmpdir } from "node:os";
 import { dirname, join, posix, relative } from "node:path";
 import { after, before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { build, loadConfig, platformVars } from "../scripts/build.mjs";
+import { basePath, build, loadConfig, platformVars } from "../scripts/build.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const config = loadConfig();
 const release = config.release;
+// The primary host serves the site at "/"; the GitHub Pages mirror under its
+// project path. Both builds are checked.
+const PRIMARY = "https://ransomware-sentinel-site.vercel.app";
+const MIRROR_PATH = new URL(`${config.mirrorUrl}/`).pathname;
 const PRIVATE_REPO = /github\.com\/h4timfr\/ransomware-sentinel(?!-site)(?:[/."'#?\s]|$)/i;
 
 let out;
+let mirrorOut;
 let htmlFiles;
 const html = new Map(); // dist-relative posix path -> content
 
@@ -48,12 +53,18 @@ function decode(value) {
 
 before(() => {
   out = mkdtempSync(join(tmpdir(), "sentinel-site-test-"));
-  build({ outDir: out, quiet: true });
+  // Explicit, so a SITE_BASE_PATH in the developer's shell cannot change it.
+  build({ outDir: out, quiet: true, sitePath: "/" });
+  mirrorOut = mkdtempSync(join(tmpdir(), "sentinel-site-mirror-"));
+  build({ outDir: mirrorOut, quiet: true, sitePath: MIRROR_PATH });
   htmlFiles = walk(out).filter((f) => f.endsWith(".html"));
   for (const f of htmlFiles) html.set(relative(out, f).split("\\").join("/"), readFileSync(f, "utf8"));
 });
 
-after(() => rmSync(out, { recursive: true, force: true }));
+after(() => {
+  rmSync(out, { recursive: true, force: true });
+  rmSync(mirrorOut, { recursive: true, force: true });
+});
 
 describe("build", () => {
   test("produces every page, the download redirect, sitemap and robots.txt", () => {
@@ -479,6 +490,21 @@ describe("public artifact hygiene", () => {
 });
 
 describe("release facts", () => {
+  test("the frozen v1.3.2 release facts are exact", () => {
+    // v1.3.2 is published and frozen: these values describe the file on the
+    // public release and must never drift while the site offers this tag.
+    if (release.tag !== "v1.3.2") return;
+    assert.equal(release.version, "1.3.2");
+    assert.equal(release.installerFile, "RansomwareSentinel-Setup.exe");
+    assert.equal(release.sha256, "318e10deb4c095d85d17a11bfd952d92df14dfb586f71b647d8a176b6d4d472f");
+    assert.equal(release.sizeBytes, 34484774);
+    assert.equal(release.signed, false);
+    assert.equal(release.architecture, "64-bit (x64)");
+    assert.equal(release.windows, "Windows 10 (version 1809 or later) or Windows 11, 64-bit");
+    assert.equal(release.testedOn, "Windows 11");
+    assert.equal(release.downloadUrl, `${config.publicRepoUrl}/releases/download/v1.3.2/RansomwareSentinel-Setup.exe`);
+  });
+
   test("the release notes publish the same checksum and size as the site", () => {
     const notes = readFileSync(join(ROOT, "release-notes", `${release.tag}.md`), "utf8");
     assert.ok(notes.includes(release.sha256), `release notes do not list ${release.sha256}`);
@@ -531,6 +557,113 @@ describe("release facts", () => {
 });
 
 describe("hosting", () => {
+  test("Vercel is the canonical host for canonical, social, sitemap and robots URLs", () => {
+    assert.equal(config.siteUrl, PRIMARY);
+    for (const [page, content] of html) {
+      if (page.startsWith("download/windows")) continue;
+      const canonical = content.match(/<link rel="canonical" href="([^"]+)">/);
+      if (page === "404.html") assert.equal(canonical, null, "the 404 page must not declare a canonical URL");
+      else {
+        const path = page === "index.html" ? "" : page.replace(/index\.html$/, "");
+        assert.equal(canonical?.[1], `${PRIMARY}/${path}`, `${page} canonical`);
+        assert.ok(content.includes(`<meta property="og:url" content="${PRIMARY}/${path}">`), `${page} og:url`);
+      }
+      assert.ok(content.includes(`<meta property="og:image" content="${PRIMARY}/assets/img/og-image.png">`), `${page} og:image`);
+    }
+    const sitemap = readFileSync(join(out, "sitemap.xml"), "utf8");
+    const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+    assert.ok(locs.length >= 6);
+    for (const loc of locs) assert.ok(loc.startsWith(`${PRIMARY}/`), `sitemap entry ${loc}`);
+    assert.equal(readFileSync(join(out, "robots.txt"), "utf8"), `User-agent: *\nAllow: /\n\nSitemap: ${PRIMARY}/sitemap.xml\n`);
+  });
+
+  test("the primary build never uses the mirror's project path as a site path", () => {
+    // The GitHub repository and mirror URLs legitimately contain the same
+    // name (github.com/h4timfr/ransomware-sentinel-site/...); a site path
+    // starts the URL.
+    const sitePathUse = new RegExp(`(?:["'(\\s=]|url\\()${MIRROR_PATH}`);
+    for (const file of walk(out)) {
+      if (!/\.(html|css|js|xml|txt|json|svg)$/.test(file)) continue;
+      const m = readFileSync(file, "utf8").match(sitePathUse);
+      assert.ok(!m, `${relative(out, file)} uses the mirror path: ${m && m[0]}`);
+    }
+  });
+
+  test("the 404 page loads its stylesheet, script, icons and links from the host's root", () => {
+    for (const [dir, base] of [[out, "/"], [mirrorOut, MIRROR_PATH]]) {
+      const page = readFileSync(join(dir, "404.html"), "utf8");
+      const refs = [...page.matchAll(/\s(?:href|src)="([^"#]+)"/g)].map((m) => m[1]).filter((r) => !/^https?:/.test(r));
+      assert.ok(refs.length >= 8);
+      for (const ref of refs) {
+        assert.ok(ref.startsWith(base), `${base} 404 links ${ref}`);
+        const target = ref.slice(base.length);
+        const file = join(dir, target.endsWith("/") || target === "" ? join(target, "index.html") : target);
+        assert.ok(existsSync(file), `${base} 404: ${ref} does not exist in the build`);
+      }
+      for (const asset of ["assets/css/site.css", "assets/js/site.js", "assets/img/favicon.svg"]) {
+        assert.ok(page.includes(`"${base}${asset}"`), `${base} 404 does not load ${asset}`);
+      }
+    }
+  });
+
+  test("the mirror build differs from the primary build only in its 404 page", () => {
+    const files = (dir) => walk(dir).map((f) => relative(dir, f).split("\\").join("/")).sort();
+    assert.deepEqual(files(mirrorOut), files(out));
+    for (const f of files(out)) {
+      const same = readFileSync(join(out, f)).equals(readFileSync(join(mirrorOut, f)));
+      assert.equal(same, f !== "404.html", `${f} ${same ? "should differ" : "differs"} between the builds`);
+    }
+  });
+
+  test("legacy anchors still lead somewhere: /#how-it-works and the docs anchors that moved", () => {
+    const home = html.get("index.html");
+    const docs = html.get("docs/index.html");
+    // Without JavaScript the old id still exists; with it, site.js forwards.
+    assert.match(home, /<section [^>]*id="how-it-works"/);
+    assert.match(home, /<a hidden data-legacy-anchor="how-it-works" href="\.\/how-it-works\/">/);
+    assert.match(docs, /<section id="limitations">/);
+    for (const [anchor, href] of [["limitations", "../how-it-works/#limitations"], ["scoring", "../how-it-works/#signals"],
+      ["monitoring-model", "../how-it-works/#observe"], ["release", "../download/"]]) {
+      assert.ok(docs.includes(`<a hidden data-legacy-anchor="${anchor}" href="${href}">`), `docs/#${anchor} is not forwarded`);
+    }
+    const js = readFileSync(join(ROOT, "src", "assets", "js", "site.js"), "utf8");
+    assert.match(js, /a\[data-legacy-anchor\]/);
+    assert.match(js, /location\.replace\(moved\.href\)/);
+    // Navigation goes to the page itself, never to the old homepage anchor.
+    for (const [page, content] of html) {
+      for (const tag of tags(content, "a")) {
+        const a = attrs(tag);
+        if ("data-legacy-anchor" in a) continue;
+        assert.ok(!/#how-it-works$/.test(a.href || ""), `${page} links to the legacy anchor: ${a.href}`);
+      }
+    }
+  });
+
+  test("links in the published release notes resolve on the current site", () => {
+    const notes = readFileSync(join(ROOT, "release-notes", `${release.tag}.md`), "utf8");
+    const links = [...notes.matchAll(/\]\((https:\/\/[^)]+)\)/g)].map((m) => m[1])
+      .filter((u) => u.startsWith(config.mirrorUrl) || u.startsWith(config.siteUrl));
+    assert.ok(links.length >= 2);
+    for (const url of links) {
+      const u = new URL(url);
+      const path = u.pathname.slice(u.pathname.startsWith(MIRROR_PATH) ? MIRROR_PATH.length : 1);
+      const page = html.get(`${path}index.html`);
+      assert.ok(page, `${url}: no such page`);
+      if (u.hash) assert.match(page, new RegExp(`\\sid="${u.hash.slice(1)}"`), `${url}: no such anchor`);
+    }
+  });
+
+  test("the Pages workflow builds with the mirror's base path, and bad base paths are refused", () => {
+    const workflow = readFileSync(join(ROOT, ".github", "workflows", "site.yml"), "utf8");
+    assert.match(workflow, /\n {8}env:\n {10}SITE_BASE_PATH: \/ransomware-sentinel-site\/\n/, "the Pages build must set SITE_BASE_PATH to the mirror's path");
+    assert.equal(MIRROR_PATH, "/ransomware-sentinel-site/");
+    assert.equal(basePath(""), "/");
+    assert.equal(basePath(MIRROR_PATH), MIRROR_PATH);
+    for (const bad of ["ransomware-sentinel-site", "/ransomware-sentinel-site", "https://example.org/", "/../"]) {
+      assert.throws(() => basePath(bad), /SITE_BASE_PATH/, bad);
+    }
+  });
+
   test("Vercel serves the same content security policy as the pages, plus frame-ancestors", () => {
     const vercel = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8"));
     const headers = Object.fromEntries(vercel.headers.find((h) => h.source === "/(.*)").headers.map((h) => [h.key, h.value]));

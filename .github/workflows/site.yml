@@ -1,5 +1,6 @@
-# Test the website on every push and pull request; deploy it to GitHub Pages
-# from main. Before deploying, the published installer is downloaded and
+# Test the website on every push and pull request; deploy the GitHub Pages
+# mirror from main (the primary host, Vercel, deploys main through its own
+# GitHub integration). Before deploying, the published installer is downloaded and
 # checked against site.config.json, so the site never goes live pointing at a
 # missing or different file.
 name: Website
@@ -34,8 +35,13 @@ jobs:
       - name: Check the published installer matches the site
         run: npm run check:release -- --remote
 
+      # The GitHub Pages mirror is served under the project path (mirrorUrl in
+      # site.config.json); only 404.html needs it. Canonical URLs still name
+      # the primary host (siteUrl).
       - name: Build
         run: npm run build
+        env:
+          SITE_BASE_PATH: /ransomware-sentinel-site/
 
       - name: Upload the site
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

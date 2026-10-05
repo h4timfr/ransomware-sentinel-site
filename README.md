@@ -1,10 +1,10 @@
 # Ransomware Sentinel: website and downloads
 
-The public website for [Ransomware Sentinel](https://h4timfr.github.io/ransomware-sentinel-site/),
+The public website for [Ransomware Sentinel](https://ransomware-sentinel-site.vercel.app/),
 a local ransomware detection app for Windows, and the public home of its
 installer releases.
 
-Looking for the app? **[Download it here](https://h4timfr.github.io/ransomware-sentinel-site/download/)**.
+Looking for the app? **[Download it here](https://ransomware-sentinel-site.vercel.app/download/)**.
 Nothing in this repository needs to be built or run to use Ransomware Sentinel.
 
 This repository is for maintaining the site. The application's source code
@@ -21,7 +21,8 @@ release tag vX.Y.Z                         GitHub release vX.Y.Z
   └─ installer build  ─────upload─────►      RansomwareSentinel-Setup.exe
                                              RansomwareSentinel-Setup.exe.sha256
                                            site.config.json (version, URL, SHA-256, size)
-                                             └─ GitHub Pages: the website
+                                             └─ the website: Vercel (primary),
+                                                GitHub Pages (mirror)
 ```
 
 Visitors never touch the private repository: the site and the installer are
@@ -40,10 +41,10 @@ both served from this public one, anonymously, over HTTPS.
 | `scripts/build.mjs` | The build (Node, no dependencies) → `dist/`. |
 | `scripts/check-release.mjs` | Verifies the config against the installer file or the published release. |
 | `scripts/optimize-images.py` | Turns application screenshots into the responsive WebP files. |
-| `scripts/serve.mjs` | Local preview at the same path GitHub Pages uses. |
+| `scripts/serve.mjs` | Local preview at the host's base path (`SITE_BASE_PATH`, default `/`). |
 | `tests/site.test.mjs` | Links, assets, accessibility basics, security policy, download, version, claims and leak checks. |
 | `release-notes/` | The text of each GitHub release. |
-| `.github/workflows/site.yml` | Test, verify the published installer, deploy to Pages. |
+| `.github/workflows/site.yml` | Test, verify the published installer, deploy the GitHub Pages mirror. |
 
 ## Working on the site
 
@@ -52,7 +53,7 @@ Requires Node.js 20 or later. There are no npm dependencies.
 ```
 npm test                 # build into a temp folder and check everything
 npm run build            # -> dist/
-npm run serve            # -> http://localhost:4173/ransomware-sentinel-site/
+npm run serve            # -> http://localhost:4173/
 ```
 
 Keep the site honest. The tests reject claims the product can't back up
@@ -117,6 +118,26 @@ On Vercel, `vercel.json` also sends the same policy as an HTTP header, plus
 `frame-ancestors 'none'` (which a `<meta>` tag cannot express) and the usual
 hardening headers; a test keeps the two policies identical. GitHub Pages
 cannot set custom headers.
+
+### Hosts and base paths
+
+`siteUrl` in `site.config.json` is the primary host,
+https://ransomware-sentinel-site.vercel.app: every canonical link, social
+preview URL, sitemap entry and the robots.txt sitemap line name it, on both
+hosts. `mirrorUrl` is the GitHub Pages mirror,
+https://h4timfr.github.io/ransomware-sentinel-site, served under
+`/ransomware-sentinel-site/`.
+
+Pages link to each other relatively, so the same files work on both hosts.
+Only `404.html`, which a host serves at any missing path, needs the host's
+base path. The build takes it from `SITE_BASE_PATH` (default `/`, for Vercel);
+the Pages workflow sets `SITE_BASE_PATH=/ransomware-sentinel-site/`. To
+preview the mirror locally, build and serve with the same value (in Git Bash
+also set `MSYS_NO_PATHCONV=1`, or the path is rewritten to a Windows path).
+
+Old links to `/#how-it-works` and to anchors that moved off the docs page are
+forwarded by `site.js` (elements marked `data-legacy-anchor`); without
+JavaScript the old anchors still exist and point to the new pages.
 
 ## Platforms
 

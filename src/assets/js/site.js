@@ -1,9 +1,24 @@
 // The only script on the site. Everything works without it: it adds a
-// "Copy" button beside the checksum, closes the mobile menu after a tap and
-// collapses the documentation contents on narrow screens.
+// "Copy" button beside the checksum, closes the mobile menu after a tap,
+// collapses the documentation contents on narrow screens, and forwards links
+// to anchors that have moved to their new home.
 // It makes no network requests and stores nothing.
 (() => {
   "use strict";
+
+  // A link to a moved anchor (for example "/#how-it-works" from before the
+  // How it works page existed) is forwarded to where that content lives now.
+  // Without JavaScript the anchor still exists and points there.
+  let anchor = "";
+  try { anchor = decodeURIComponent(location.hash.slice(1)); } catch { /* malformed hash: ignore it */ }
+  if (anchor) {
+    const moved = [...document.querySelectorAll("a[data-legacy-anchor]")]
+      .find((a) => a.dataset.legacyAnchor === anchor);
+    if (moved) {
+      location.replace(moved.href);
+      return;
+    }
+  }
 
   for (const button of document.querySelectorAll("[data-copy]")) {
     const target = document.getElementById(button.dataset.copy);

@@ -6,8 +6,12 @@
 // wrapped in src/partials/layout.html, and every release fact (version,
 // download URL, checksum, size...) comes from site.config.json, so a new
 // release changes one file. Links between pages are written relative
-// ({{root}}), so the site works at a GitHub Pages project path or at the root
-// of a custom domain without changes.
+// ({{root}}), so the same pages work at the root of the primary host (Vercel)
+// and under the GitHub Pages mirror's project path. Only 404.html, which is
+// served at any depth, needs the host's base path: SITE_BASE_PATH (default
+// "/") sets it, and the Pages workflow passes "/ransomware-sentinel-site/".
+// Canonical, sitemap, robots and social URLs always name the primary host
+// (siteUrl), so the mirror points search engines back to it.
 
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -105,16 +109,25 @@ export function platformVars(config) {
   };
 }
 
+// The URL path the site is served from: "/" on the primary host, the
+// project path on the GitHub Pages mirror.
+export function basePath(value = process.env.SITE_BASE_PATH) {
+  const path = value || "/";
+  if (!/^\/(?:(?!\.+\/)[A-Za-z0-9._-]+\/)*$/.test(path)) {
+    throw new Error(`SITE_BASE_PATH must start and end with "/" (for example "/ransomware-sentinel-site/"), not "${path}"`);
+  }
+  return path;
+}
+
 function relativeRoot(outPath) {
   const depth = outPath.split("/").length - 1;
   return depth === 0 ? "./" : "../".repeat(depth);
 }
 
-export function build({ config = loadConfig(), outDir = DIST, quiet = false } = {}) {
+export function build({ config = loadConfig(), outDir = DIST, quiet = false, sitePath = basePath() } = {}) {
   const release = config.release;
   const layout = readFileSync(join(SRC, "partials", "layout.html"), "utf8");
   const shots = JSON.parse(readFileSync(join(SRC, "assets", "img", "shots", "manifest.json"), "utf8"));
-  const sitePath = new URL(config.siteUrl + "/").pathname; // "/ransomware-sentinel-site/" or "/"
 
   const base = {
     siteName: config.siteName,
@@ -150,7 +163,7 @@ export function build({ config = loadConfig(), outDir = DIST, quiet = false } = 
     const file = join(SRC, "pages", name);
     const { meta, body } = parsePage(file);
     const outPath = meta.path === "404" ? "404.html" : `${meta.path}index.html`;
-    // 404.html is served at any depth, so it links from the site's absolute path.
+    // 404.html is served at any depth, so it links from the host's base path.
     const root = meta.path === "404" ? sitePath : relativeRoot(outPath);
     const canonical = meta.path === "404" ? "" : `${config.siteUrl}/${meta.path}`;
     const vars = {
